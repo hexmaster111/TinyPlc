@@ -11,7 +11,7 @@ void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
 {
   x *= LD_ASSET_WIDTH;
   y *= LD_ASSET_HEIGHT + 1;
-  y += 2; // Scoot down one pixel to account for the font
+  y += 2; // Offset
 
   disp->drawBitmap(
       x,
@@ -25,7 +25,7 @@ void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
 void disp_draw_text_on_grid(DispPtr disp, String text, int x, int y)
 {
   x *= LD_ASSET_WIDTH;
-  y += 1; // Next Line from requested as atafrute draws text from below the line
+  y += 1; // Next Line
   y *= LD_ASSET_HEIGHT + 1;
 
   disp->setCursor(
@@ -49,20 +49,16 @@ void setup()
   disp_draw_text_on_grid(&display, "I:00", 0, 0);
   disp_draw_asset_on_grid(&display, CONTACT_NO, 0, 1);
 
-  disp_draw_text_on_grid(&display, "I:01", 0, 2);
-  disp_draw_asset_on_grid(&display, CONTACT_NC, 0, 3);
+  disp_draw_asset_on_grid(&display, WIRE, 1, 1);
+  disp_draw_asset_on_grid(&display, WIRE, 2, 1);
+  disp_draw_asset_on_grid(&display, WIRE, 3, 1);
+  disp_draw_asset_on_grid(&display, WIRE, 4, 1);
+  disp_draw_asset_on_grid(&display, WIRE, 5, 1);
 
-  disp_draw_text_on_grid(&display, "I:02", 0, 4);
-  disp_draw_asset_on_grid(&display, CONTACT_NC, 0, 5);
+  disp_draw_text_on_grid(&display, "O:00", 6, 0);
+  disp_draw_asset_on_grid(&display, LOAD_COIL, 6, 1);
 
-  disp_draw_text_on_grid(&display, "I:03", 0, 6);
-  disp_draw_asset_on_grid(&display, CONTACT_NC, 0, 7);
-
-  disp_draw_text_on_grid(&display, "I:04", 0, 8);
-  disp_draw_asset_on_grid(&display, CONTACT_NC, 0, 9);
-
-  disp_draw_text_on_grid(&display, "I:05", 0, 10);
-  disp_draw_asset_on_grid(&display, CONTACT_NC, 0, 11);
+  disp_draw_asset_on_grid(&display, WIRE, 7, 1);
 
   display.display();
 }
