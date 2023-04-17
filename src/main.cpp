@@ -7,7 +7,8 @@ Disp display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void loop(){};
 
-#define DISP_FLAG_UP_TO_NEXT_LEFT 1 // Extend the WIRE_UP_FROM_XXX asset up to the connecting line
+#define DISP_FLAG_UP_TO_NEXT_LEFT 1 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
+#define DISP_FLAG_UP_TO_NEXT_RIGHT 2 // Extend the WIRE_UP_FROM_RIGHT asset up to the connecting line
 
 void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = 0)
 {
@@ -34,6 +35,11 @@ void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_
         x + line_x_offset,
         y - (LD_ASSET_HEIGHT + (.5 * LD_ASSET_HEIGHT) + 1),
         1);
+  }
+
+  if (disp_flags & DISP_FLAG_UP_TO_NEXT_RIGHT)
+  {
+    //TODO: Verify this works
   }
 }
 

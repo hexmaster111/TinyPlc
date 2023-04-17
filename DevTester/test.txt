@@ -1,0 +1,1 @@
+gcc -std=c99 -Wall -Wextra -pedantic -Wno-misleading-indentation -Wno-shift-negative-value -O2 -o bin/file_browser file_browser.c -lglfw3 -lopengl32 -lm -lGLU32 -lGLEW32
