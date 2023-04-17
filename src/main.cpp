@@ -7,7 +7,9 @@ Disp display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void loop(){};
 
-void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
+#define DISP_FLAG_UP_TO_NEXT_LEFT 1 // Extend the WIRE_UP_FROM_XXX asset up to the connecting line
+
+void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = 0)
 {
   x *= LD_ASSET_WIDTH;
   y *= LD_ASSET_HEIGHT + 1;
@@ -20,6 +22,19 @@ void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
       LD_ASSET_WIDTH,
       LD_ASSET_HEIGHT,
       1);
+
+  if (disp_flags & DISP_FLAG_UP_TO_NEXT_LEFT)
+  {
+    const int line_x_offset = 8;
+    const int line_y_offset = 2;
+
+    disp->drawLine(
+        x + line_x_offset,
+        y + line_y_offset,
+        x + line_x_offset,
+        y - (LD_ASSET_HEIGHT + (.5 * LD_ASSET_HEIGHT) + 1),
+        1);
+  }
 }
 
 void disp_draw_text_on_grid(DispPtr disp, String text, int x, int y)
@@ -49,8 +64,16 @@ void setup()
   disp_draw_text_on_grid(&display, "I:00", 0, 0);
   disp_draw_asset_on_grid(&display, CONTACT_NO, 0, 1);
 
+  disp_draw_text_on_grid(&display, "O:00", 0, 2);
+  disp_draw_asset_on_grid(&display, CONTACT_NO, 0, 3);
+
+  disp_draw_asset_on_grid(&display, WIRE_UP_FROM_LEFT, 1, 3, DISP_FLAG_UP_TO_NEXT_LEFT);
+
   disp_draw_asset_on_grid(&display, WIRE, 1, 1);
-  disp_draw_asset_on_grid(&display, WIRE, 2, 1);
+
+  disp_draw_text_on_grid(&display, "I:01", 2, 0);
+  disp_draw_asset_on_grid(&display, CONTACT_NC, 2, 1);
+
   disp_draw_asset_on_grid(&display, WIRE, 3, 1);
   disp_draw_asset_on_grid(&display, WIRE, 4, 1);
   disp_draw_asset_on_grid(&display, WIRE, 5, 1);
@@ -59,6 +82,17 @@ void setup()
   disp_draw_asset_on_grid(&display, LOAD_COIL, 6, 1);
 
   disp_draw_asset_on_grid(&display, WIRE, 7, 1);
+
+  disp_draw_asset_on_grid(&display, WIRE, 0, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 1, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 2, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 3, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 4, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 5, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 6, 4);
+  disp_draw_asset_on_grid(&display, WIRE, 7, 4);
+
+  disp_draw_text_on_grid(&display, "((I:00 || O:00 ) && I:02) = O:00", 0, 5);
 
   display.display();
 }
