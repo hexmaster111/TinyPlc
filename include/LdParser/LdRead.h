@@ -1,6 +1,8 @@
 #ifndef LdRead_h
 #define LdRead_h
 #define MAX_STR_LEN 256
+#define MAX_LBL_LEN 32
+#define MAX_LD_ELEMS 256
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -24,7 +26,15 @@ typedef struct Ld
     char expr[MAX_STR_LEN];
     char load_str[MAX_STR_LEN];
     int curPos;
+    LdDiaElem[MAX_LD_ELEMS] elems;
 } Ld;
+
+typedef struct LdDiaElem{
+    char lbl[MAX_LBL_LEN];
+    int row;
+    int col;
+    int type;
+} LdDiaElem;
 
 
 #define INVALID_EXPR(msg) TODO("Invalid expression: " msg)
@@ -65,6 +75,8 @@ void LD_ParseExpr(Ld *ld, char *expr)
 {
     //"O:00=((I:00|O:00)&I:01&(I:02|!I:03))"
 
+    // C.O:00     - Coil, lbl O:00 Load
+    // = - end of load def
     // ( - Branch Start
     //    ( - Branch Start
     //      I:00     - NO Contact: row 0, col 0, lbl I:00
