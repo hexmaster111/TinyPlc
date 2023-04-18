@@ -26,9 +26,10 @@ typedef struct Ld
     int curPos;
 } Ld;
 
+
 #define INVALID_EXPR(msg) TODO("Invalid expression: " msg)
 
-void LD_ParseLoad(Ld *ld)
+void LD_ParseLoad(Ld* ld)
 {
     int i = 0;
     while (ld->expr[i] != '=')
@@ -63,6 +64,23 @@ void LD_ParseExprStr(Ld *ld)
 void LD_ParseExpr(Ld *ld, char *expr)
 {
     //"O:00=((I:00|O:00)&I:01&(I:02|!I:03))"
+
+    // ( - Branch Start
+    //    ( - Branch Start
+    //      I:00     - NO Contact
+    //      |
+    //      O:00     - NO Contact
+    //    ) - Branch End
+    //    & - Start Series
+    //      I:01     - NO Contact
+    //    & - End Series
+    //    ( - Branch Start
+    //      I:02     - NO Contact
+    //      |
+    //      !I:03    - NC Contact
+    //    ) - Branch End
+    // ) - Branch End
+
     cpystr(ld->expr, expr);
     LD_ParseLoad(ld);
     LD_ParseExprStr(ld);
