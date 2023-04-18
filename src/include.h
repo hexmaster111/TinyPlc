@@ -7,6 +7,7 @@
 #include "assets.h"
 #include <Fonts/Picopixel.h>
 #include "disp.h"
+#include <LdParser/LdRead.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64

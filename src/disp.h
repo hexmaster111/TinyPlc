@@ -87,8 +87,5 @@ void dsp_draw_ld_exp(DispPtr disp, String exp, String *err = NULL)
 {
 
     // Example expression: O:00=((I:00|O:00)&I:01&(I:02|!I:03))
-
-    // Anything before the first = is the output of this line
-    String LoadExpr = exp.substring(0, exp.indexOf("="));
 }
 #endif
