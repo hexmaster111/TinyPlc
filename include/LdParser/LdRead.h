@@ -67,17 +67,17 @@ void LD_ParseExpr(Ld *ld, char *expr)
 
     // ( - Branch Start
     //    ( - Branch Start
-    //      I:00     - NO Contact
-    //      |
-    //      O:00     - NO Contact
+    //      I:00     - NO Contact: row 0, col 0, lbl I:00
+    //      |     - OR (row + 1) 
+    //      O:00     - NO Contact row 1, col 0, lbl O:00
     //    ) - Branch End
-    //    & - Start Series
-    //      I:01     - NO Contact
-    //    & - End Series
+    //    & - And (col + 1)
+    //      I:01     - NO Contact row 0, col 1, lbl I:01
+    //    & - And (col + 1)
     //    ( - Branch Start
-    //      I:02     - NO Contact
-    //      |
-    //      !I:03    - NC Contact
+    //      I:02     - NO Contact row 0, col 2, lbl I:02
+    //      |    - OR (row + 1)
+    //      !I:03    - NC Contact row 1, col 2 lbl I:03
     //    ) - Branch End
     // ) - Branch End
 
