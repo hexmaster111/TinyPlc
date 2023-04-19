@@ -95,7 +95,6 @@ void LD_read_expr(Ld *ld)
 }
 
 #define PARSE_LOG(...) printf(__VA_ARGS__)
-#define CURRENT_ELEM ld->elems[ld->elemCount]
 
 // fills out the ld->elems array
 void LD_parse_expr(Ld *ld)
@@ -123,97 +122,7 @@ void LD_parse_expr(Ld *ld)
 
     while (ld->expr[ld->curPos] != '\0')
     {
-        char c = ld->expr[ld->curPos];
-        PARSE_LOG("Parsing Char: %c\n", c);
-
-        // if we are parcing a string of data
-        if (ld->isParsingData)
-        {
-            // And we hit the end of the data
-            if (c == '|' || c == '&' || c == '(' || c == ')')
-            {
-                ld->strBuff[ld->strBuffPos] = '\0';
-                cpystr(CURRENT_ELEM.data, ld->strBuff);
-
-                CURRENT_ELEM.type = LD_ELEM_DATA;
-                CURRENT_ELEM.row = ld->curRow;
-                CURRENT_ELEM.col = ld->curCol;
-                PARSE_LOG("END OF DATA: %s, %d, %d (%d)\n", CURRENT_ELEM.data, CURRENT_ELEM.row, CURRENT_ELEM.col, ld->elemCount);
-                ld->elemCount++;
-                ld->strBuffPos = 0;
-                ld->isParsingData = 0;
-                continue;
-            }
-
-            if (c == '\0')
-            {
-                INVALID_EXPR("Unexpected end of expression");
-            }
-
-            // Add the char to the string buffer
-            CURRENT_ELEM.data[ld->strBuffPos] = c;
-            ld->strBuffPos++;
-            ld->curPos++;
-            continue;
-        }
-
-        switch (c)
-        {
-        case ' ':
-            // Ignore spaces
-            break;
-        case '(':
-            // Branch Start
-            ld->elems[ld->elemCount].type = LD_ELEM_BRANCH_START;
-            ld->elems[ld->elemCount].row = ld->curRow;
-            ld->elems[ld->elemCount].col = ld->curCol;
-            ld->elemCount++;
-            ld->curCol++;
-            PARSE_LOG("Branch Start: %d, %d (%d)\n", ld->curRow, ld->curCol, ld->elemCount);
-            break;
-        case ')':
-            // Branch End
-            ld->elems[ld->elemCount].type = LD_ELEM_BRANCH_END;
-            ld->elems[ld->elemCount].row = ld->curRow;
-            ld->elems[ld->elemCount].col = ld->curCol;
-            ld->elemCount++;
-            ld->curCol++;
-            PARSE_LOG("Branch End: %d, %d (%d)\n", ld->curRow, ld->curCol, ld->elemCount);
-            break;
-        case '&':
-            // And
-            ld->elems[ld->elemCount].type = LD_ELEM_AND;
-            ld->elems[ld->elemCount].row = ld->curRow;
-            ld->elems[ld->elemCount].col = ld->curCol;
-            ld->elemCount++;
-            ld->curCol++;
-            PARSE_LOG("And: %d, %d (%d)\n", ld->curRow, ld->curCol, ld->elemCount);
-            break;
-        case '|':
-            // Or
-            ld->elems[ld->elemCount].type = LD_ELEM_OR;
-            ld->elems[ld->elemCount].row = ld->curRow;
-            ld->elems[ld->elemCount].col = ld->curCol;
-            ld->elemCount++;
-            ld->curRow++;
-            PARSE_LOG("Or: %d, %d (%d)\n", ld->curRow, ld->curCol, ld->elemCount);
-            break;
-        case '!':
-            // Not
-            TODO("Not");
-            break;
-
-        default:
-            // Anything else is data that will be parsed later in the process
-            ld->elems[ld->elemCount].type = LD_ELEM_DATA;
-            ld->elems[ld->elemCount].row = ld->curRow;
-            ld->elems[ld->elemCount].col = ld->curCol;
-            ld->elems[ld->elemCount].data[ld->strBuffPos] = c;
-            ld->strBuffPos++;
-            ld->isParsingData = 1;
-            PARSE_LOG("FOUND START OF DATA\n");
-        }
-
+        PARSE_LOG("Parsing: %c\n", ld->expr[ld->curPos]);
         // Advance to the next character
         ld->curPos++;
     }
