@@ -54,7 +54,7 @@ typedef struct Ld
     int curRow;                    // Current row in the diagram
     int curCol;                    // Current column in the diagram
     int elemCount;                 // Number of elements in the diagram
-    char strBuff[MAX_STR_LEN];     // Buffer for reading strings
+    char strBuff[25];              // Buffer for reading strings
     int strBuffPos;                // Current position in the string buffer
     int isParsingData;             // Are we parsing data or a label (0 no, 1 yes)
     LdDiaElem elems[MAX_LD_ELEMS]; // Array of elements parsed from the expression
@@ -122,9 +122,8 @@ void LD_parse_expr(Ld *ld)
 
     while (ld->expr[ld->curPos] != '\0')
     {
-        PARSE_LOG("Parsing: %c\n", ld->expr[ld->curPos]);
-        // Advance to the next character
-        ld->curPos++;
+        char c = ld->expr[ld->curPos];
+        PARSE_LOG("Parsing: %c\n", c);
     }
 }
 
@@ -149,70 +148,70 @@ void LD_parse_expr(Ld *ld)
 // ) - Branch End
 
 //"C.O:00=(I:00|I:01)"
-// C.O:00     - Coil, data O:00
+// C.O:00     -  data C.O:00
 // = - end of load def
 // ( - Branch Start
-//    I:00     - NO Contact row 0, col 0, data I:00
+//    I:00     -  row 0, col 0, data I:00
 //    |     - OR (row + 1)
-//    I:01     - NO Contact row 1, col 0, data I:01
+//    I:01     -  row 1, col 0, data I:01
 // ) - Branch End
 
 //"C.O:00=(I:00|(I:01&I:02))"
-// C.O:00     - Coil, data O:00
+// C.O:00     -data C.O:00
 // = - end of load def
 // ( - Branch Start
 //    I:00     - NO Contact row 0, col 0, data I:00
 //    |     - OR (row + 1)
 //    ( - Branch Start
-//      I:01     - NO Contact row 1, col 1, data I:01
+//      I:01     -  row 1, col 1, data I:01
 //      &     - AND (col + 1)
-//      I:02     - NO Contact row 1, col 2, data I:02
+//      I:02     -  row 1, col 2, data I:02
 //    ) - Branch End
 // ) - Branch End
 
 // O0=(((I0&I1)|(!O0&I1)&!I2)|I3)
-// O0    - No Type, data O0
+// O0    -  data O0
 // = - end of load def
 // ( - Branch Start
 //    ( - Branch Start
 //      ( - Branch Start
-//        I0     - NO Contact row 0, col 0, data I0
+//        I0     - row 0, col 0, data I0
 //        &     - AND (col + 1)
-//        I1     - NO Contact row 0, col 1, data I1
+//        I1     -  row 0, col 1, data I1
 //      ) - Branch End
 //      |     - OR (row + 1, col = 0)
 //      ( - Branch Start
-//        !O0    - NC Contact row 1, col 0, data O0
+//        !O0    -  row 1, col 0, data !O0
 //        &     - AND (col + 1)
-//        I1     - NO Contact row 1, col 1, data I1
+//        I1     -  row 1, col 1, data I1
 //      ) - Branch End
 //      &     - AND (col + 1)
-//      !I2    - NC Contact row 0, col 2, data I2
+//      !I2    - row 0, col 2, data !I2
 //    ) - Branch End
 //    |     - OR (row + 1)
-//    I3     - NO Contact row 2, col 0, data I3
+//    I3     -  row 2, col 0, data I3
 // ) - Branch End
 
 // O0=(I0&I1)
 // O0    - No Type, data O0
 // = - end of load def
 // ( - Branch Start
-//    I0     - NO Contact row 0, col 0, data I0
+//    I0     -  row 0, col 0, data I0
 //    &     - AND (col + 1)
-//    I1     - NO Contact row 0, col 1, data I1
+//    I1     -  row 0, col 1, data I1
 // ) - Branch End
 
 // C.O:00=((I0|O0)&!I1)
-// C.O:00     - Coil, data O:00
+// C.O:00     -  data C.O:00
 // = - end of load def
 // ( - Branch Start
 //    ( - Branch Start
-//      I0     - NO Contact row 0, col 0, data I0
+//      I0     -  row 0, col 0, data I0
 //      |     - OR (row + 1)
-//      O0     - NO Contact row 1, col 0, data O0
+//      O0     -  row 1, col 0, data O0
 //    ) - Branch End
 //    &     - AND (col + 1)
-//    !I1    - NC Contact row 0, col 1, data I1
+//    !I1    -  row 0, col 1, data !I1
 // ) - Branch End
 
 // O0=((I0&I1&I2)|(I3&I4&I5)|(I6&I7&I8))
@@ -220,44 +219,44 @@ void LD_parse_expr(Ld *ld)
 // = - end of load def
 // ( - Branch Start
 //  ( - Branch Start
-//      I0     - NO Contact row 0, col 0, data I0
+//      I0     -  row 0, col 0, data I0
 //      &     - AND (col + 1)
-//      I1     - NO Contact row 0, col 1, data I1
+//      I1     -  row 0, col 1, data I1
 //      &     - AND (col + 1)
-//      I2     - NO Contact row 0, col 2, data I2
+//      I2     -  row 0, col 2, data I2
 //  ) - Branch End
 //  |     - OR (row + 1 col = 0)
 //  ( - Branch Start
-//      I3     - NO Contact row 1, col 0, data I3
+//      I3     -  row 1, col 0, data I3
 //      &     - AND (col + 1)
-//      I4     - NO Contact row 1, col 1, data I4
+//      I4     -  row 1, col 1, data I4
 //      &     - AND (col + 1)
-//      I5     - NO Contact row 1, col 2, data I5
+//      I5     -  row 1, col 2, data I5
 //  ) - Branch End
 //  |     - OR (row + 1 col = 0)
 //  ( - Branch Start
-//      I6     - NO Contact row 2, col 0, data I6
+//      I6     -  row 2, col 0, data I6
 //      &     - AND (col + 1)
-//      I7     - NO Contact row 2, col 1, data I7
+//      I7     -  row 2, col 1, data I7
 //      &     - AND (col + 1)
-//      I8     - NO Contact row 2, col 2, data I8
+//      I8     -  row 2, col 2, data I8
 //  ) - Branch End
 
 // O0=(X0|I0&I1|Y0&I2&I3)
 // O0    - No Type, data O0
 // = - end of load def
 // ( - Branch Start
-//    X0     - NO Contact row 0, col 0, data X0
+//    X0     -  row 0, col 0, data X0
 //    |     - OR (row + 1 col = 0)
-//    I0     - NO Contact row 1, col 0, data I0
+//    I0     -  row 1, col 0, data I0
 //    &     - AND (col + 1)
-//    I1     - NO Contact row 1, col 1, data I1
+//    I1     -  row 1, col 1, data I1
 //    |     - OR (row + 1 col = 0)
-//    Y0     - NO Contact row 2, col 0, data Y0
+//    Y0     -  row 2, col 0, data Y0
 //    &     - AND (col + 1)
-//    I2     - NO Contact row 2, col 1, data I2
+//    I2     -  row 2, col 1, data I2
 //    &     - AND (col + 1)
-//    I3     - NO Contact row 2, col 2, data I3
+//    I3     -  row 2, col 2, data I3
 // ) - Branch End
 
 void LD_ParseExpr(Ld *ld, char *expr)
