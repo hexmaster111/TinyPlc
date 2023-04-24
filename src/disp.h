@@ -46,9 +46,33 @@ void disp_draw_text_on_grid(DispPtr disp, String text, int x, int y)
     disp->print(text);
 }
 
+#define disp_draw_named_menu_asset_on_grid(disp, label, asset, x, y) \
+    disp_draw_asset_on_grid(disp, asset, x, y);                      \
+    disp_draw_text_on_grid(disp, label, x, y + 1);
+
 #define disp_draw_labled_asset_on_grid(disp, label, asset, x, y) \
     disp_draw_asset_on_grid(disp, asset, x, y + 1);              \
     disp_draw_text_on_grid(disp, label, x, y);
+
+void disp_highlight_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
+{
+
+    // draw a fileld rectangle around the asset
+    disp->fillRect(
+        x * LD_ASSET_WIDTH,
+        y * LD_ASSET_HEIGHT + 2,
+        LD_ASSET_WIDTH,
+        LD_ASSET_HEIGHT,
+        1);
+
+    disp->drawBitmap(
+        x * LD_ASSET_WIDTH,
+        y * LD_ASSET_HEIGHT + 2,
+        asset,
+        LD_ASSET_WIDTH,
+        LD_ASSET_HEIGHT,
+        0);
+}
 
 void disp_test_drawing(DispPtr display)
 {

@@ -40,7 +40,7 @@ typedef enum LdElemType
 
 typedef struct LdDiaElem
 {
-    char data[MAX_LBL_LEN];
+    char data[MAX_LBL_LEN]; // Data for the element
     int row;
     int col;
     LdElemType type;
@@ -51,8 +51,6 @@ typedef struct Ld
     char expr[MAX_STR_LEN];        // Raw LD expression
     char load_str[MAX_STR_LEN];    // Raw Load string
     int curPos;                    // Current position in the expression
-    int curRow;                    // Current row in the diagram
-    int curCol;                    // Current column in the diagram
     int elemCount;                 // Number of elements in the diagram
     char strBuff[25];              // Buffer for reading strings
     int strBuffPos;                // Current position in the string buffer
@@ -96,41 +94,26 @@ void LD_read_expr(Ld *ld)
 
 #define PARSE_LOG(...) printf(__VA_ARGS__)
 
-// fills out the ld->elems array
 void LD_parse_expr(Ld *ld)
 {
-    // While not end of string
+    // Initialize variables for the parsing loop
+    int i = ld->curPos;
+    int row = 0;
+    int col = 0;
+    ld->elemCount = 0;
 
-    PARSE_LOG("Parsing Expression: %s\n", ld->expr);
-
-    // O:00=((I:00|O:00)&I:01&(I:02|!I:03))"
-    // ( - Branch Start
-    //    ( - Branch Start
-    //      I:00     - row 0, col 0, data I:00
-    //      |     - OR (row + 1)
-    //      O:00     - row 1, col 0, data O:00
-    //    ) - Branch End
-    //    & - And (col + 1)
-    //      I:01     - row 0, col 1, data I:01
-    //    & - And (col + 1)
-    //    ( - Branch Start
-    //      I:02     - row 0, col 2, data I:02
-    //      |    - OR (row + 1)
-    //      !I:03    - row 1, col 2 data !I:03
-    //    ) - Branch End
-    // ) - Branch End
-
-    while (ld->expr[ld->curPos] != '\0')
+    while (ld->expr[i] != '\0')
     {
-        char c = ld->expr[ld->curPos];
-        PARSE_LOG("Parsing: %c\n", c);
+        // Parse the current element
+
+        // Move to the next character
+        i++;
     }
 }
 
 //"C.O:00=((I:00|O:00)&I:01&(I:02|!I:03))"
 // C.O:00     - Coil, data O:00
 // = - end of load def
-
 // ( - Branch Start
 //    ( - Branch Start
 //      I:00     -  row 0, col 0, data I:00
