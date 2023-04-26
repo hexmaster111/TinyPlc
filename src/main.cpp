@@ -4,6 +4,10 @@ Disp display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void loop(){};
 
+void on_key_press(char key)
+{
+}
+
 void editor_ui(DispPtr disp)
 {
   disp->clearDisplay();
@@ -12,7 +16,16 @@ void editor_ui(DispPtr disp)
   disp_draw_asset_on_grid(disp, CONTACT_NO, 0, 0);
   disp_highlight_asset_on_grid(disp, CONTACT_NC, 1, 0);
   disp_draw_asset_on_grid(disp, LOAD_COIL, 2, 0);
-  disp_draw_labled_asset_on_grid(disp, "  s S b B m  M :00", LOAD_COIL, 3, 0);
+  disp_draw_asset_on_grid(disp, LOAD_LATCH, 3, 0);
+  disp_draw_asset_on_grid(disp, LOAD_RESET, 4, 0);
+
+  disp_draw_asset_on_grid(disp, LOAD_ADD, 0, 1);
+  disp_draw_asset_on_grid(disp, LOAD_SUB, 1, 1);
+  disp_draw_asset_on_grid(disp, LOAD_MUT, 2, 1);
+  disp_draw_asset_on_grid(disp, LOAD_DIV, 3, 1);
+  disp_draw_asset_on_grid(disp, UI_BACKSPACE, 4, 1);
+
+  // disp_draw_labled_asset_on_grid(disp, "  s S b B m  M :00", LOAD_COIL, 3, 0);
 
   disp->display();
 }
