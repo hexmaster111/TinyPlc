@@ -17,14 +17,34 @@ typedef const uint8_t PROGMEM *AssetPtr;
 #define LOAD_SUB epd_bitmap_LD_07
 #define LOAD_MUT epd_bitmap_LD_08
 #define LOAD_DIV epd_bitmap_LD_09
-
 #define LOAD_MOVE epd_bitmap_LD_10
-
-#define UI_BACKSPACE epd_bitmap_LD_11
 
 #define WIRE_UP_FROM_LEFT epd_bitmap_LD_12
 #define WIRE_UP_FROM_RIGHT epd_bitmap_LD_13
 #define WIRE epd_bitmap_LD_14
+
+#define UI_BACKSPACE epd_bitmap_LD_11
+
+typedef enum
+{
+    AT_ContactNc = 0,
+    AT_ContactNo,
+    AT_LoadCoil,
+    AT_LoadLatch,
+    AT_LoadReset,
+
+    AT_LoadAdd = 100,
+    AT_LoadSub,
+    AT_LoadMut,
+    AT_LoadDiv,
+
+    AT_LoadMove = 200,
+
+    AT_WireUpFromLeft = 300,
+    AT_WireUpFromRight,
+    AT_Wire,
+} AssetType;
+
 // Asset images converted with https://javl.github.io/image2cpp/
 // 'LD_00', 17x5px
 const unsigned char epd_bitmap_LD_00[] PROGMEM = {

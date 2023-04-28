@@ -6,6 +6,7 @@
 #include <Adafruit_SSD1306.h>
 #include "assets.h"
 #include <Fonts/Picopixel.h>
+#include "editor.h"
 #include "disp.h"
 #include <LdParser/LdRead.h>
 

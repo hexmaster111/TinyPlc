@@ -1,6 +1,7 @@
 #ifndef DISP_H
 #define DISP_H
 #include "include.h"
+#include "editor.h"
 typedef Adafruit_SSD1306 Disp;
 typedef Disp *DispPtr;
 #define DF_WIRE_UP_TO_NEXT 1 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
@@ -72,6 +73,24 @@ void disp_highlight_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
         LD_ASSET_WIDTH,
         LD_ASSET_HEIGHT,
         0);
+}
+
+void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row)
+{
+    for (int i = 0; i < length; i++)
+    {
+        auto element = dia->elements[i];
+        // TODO! when this comes to the wires, they will need there extend flags set
+        // TODO! When using this macro, we may need to correct the row so that we
+        //      end up skipping a row, as the takes the extra row for the name
+        int newRow = row + element.row; // Inital offset
+
+        disp_draw_labled_asset_on_grid(disp,
+                                       element.name,
+                                       element.asset,
+                                       element.col,
+                                       newRow);
+    }
 }
 
 void disp_test_drawing(DispPtr display)
