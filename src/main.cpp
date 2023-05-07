@@ -129,9 +129,8 @@ typedef struct
 
   // TODO: data for the asset, like the value of a coil, or the name of a variable, etc
 
-  // position on the diagram
-  uint8_t row;
-  uint8_t col;
+  uint8_t row; // Row, or x
+  uint8_t col; // Column, or y
 } GfxAsset;
 
 /// @brief A single diagram, there may be multiple diagrams in a single document
@@ -158,9 +157,10 @@ typedef struct
 
 typedef Editor *EditorPtr;
 
-#define DF_WIRE_UP_TO_NEXT 1 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
+#define DF_NONE 0b0000000
+#define DF_WIRE_UP_TO_NEXT 0b0000001 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
 
-void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = 0)
+void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = DF_NONE)
 {
   x *= LD_ASSET_WIDTH;
   y *= LD_ASSET_HEIGHT + 1;
@@ -229,25 +229,29 @@ void disp_highlight_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
       0);
 }
 
+// NOTE: the length is the number of elements - 1 (its zero based)
 void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row)
 {
   LOG("disp_draw_diagram: len: %i\n", length);
   LOG("_________________NAME, COL, COR ROW\n");
   for (int i = 0; i < length; i++)
   {
-    auto element = dia->elements[i];
-    // TODO! when this comes to the wires, they will need there extend flags set
-    // TODO! When using this macro, we may need to correct the row so that we
-    //      end up skipping a row, as the takes the extra row for the name
+    GfxAsset element = dia->elements[i];
+
+    u_int8_t flags = DF_NONE;
+
+    if (element.type == AT_WireUpFromLeft ||
+        element.type == AT_WireUpFromRight)
+    {
+      flags |= DF_WIRE_UP_TO_NEXT;
+    }
+
     int newRow = (row + element.row) * 2; // Inital offset
 
     LOG("disp_draw_diagram: %s, %i, %i\n", element.name, element.col, newRow);
 
-    disp_draw_labled_asset_on_grid(disp,
-                                   element.name,
-                                   element.asset,
-                                   element.col,
-                                   newRow);
+    disp_draw_asset_on_grid(disp, element.asset, element.col, newRow + 1, flags);
+    disp_draw_text_on_grid(disp, element.name, element.col, newRow);
   }
 }
 
@@ -294,7 +298,7 @@ void dsp_draw_ld_exp(DispPtr disp, String exp, String *err = NULL)
 void editor_debug(EditorPtr editor, DispPtr disp)
 {
   GfxDiagram dbg_dgm = {};
-  dbg_dgm.elementCount = 3;
+  dbg_dgm.elementCount = 5;
 
   dbg_dgm.elements[0].asset = CONTACT_NO;
   dbg_dgm.elements[0].type = AT_ContactNo;
@@ -326,7 +330,19 @@ void editor_debug(EditorPtr editor, DispPtr disp)
   dbg_dgm.elements[2].name[3] = '2';
   dbg_dgm.elements[2].name[4] = '\0';
 
-  disp_draw_diagram(disp, &dbg_dgm, 3, 0);
+  dbg_dgm.elements[2].asset = WIRE;
+  dbg_dgm.elements[2].type = AT_Wire;
+  dbg_dgm.elements[2].row = 0;
+  dbg_dgm.elements[2].col = 1;
+  dbg_dgm.elements[2].name[0] = '\0';
+
+  dbg_dgm.elements[3].asset = WIRE_UP_FROM_LEFT;
+  dbg_dgm.elements[3].type = AT_WireUpFromLeft;
+  dbg_dgm.elements[3].row = 1;
+  dbg_dgm.elements[3].col = 1;
+  dbg_dgm.elements[3].name[0] = '\0';
+
+  disp_draw_diagram(disp, &dbg_dgm, dbg_dgm.elementCount - 1, 0);
 }
 
 void editor_ui(EditorPtr editor, DispPtr disp)

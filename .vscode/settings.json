@@ -3,5 +3,6 @@
     "files.associations": {
         "cstring": "c",
         "stdio.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
