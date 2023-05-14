@@ -39,7 +39,7 @@ typedef const uint8_t PROGMEM *AssetPtr;
 #define WIRE_UP_FROM_RIGHT epd_bitmap_LD_13
 #define WIRE epd_bitmap_LD_14
 
-#define UI_BACKSPACE epd_bitmap_LD_11
+#define UI_BACKARROW epd_bitmap_LD_11
 
 typedef enum
 {
@@ -157,34 +157,52 @@ typedef struct
 
 typedef Editor *EditorPtr;
 
-#define DF_NONE 0b0000000
+#define DF_NONE /*      */ 0b0000000
 #define DF_WIRE_UP_TO_NEXT 0b0000001 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
-
+#define DF_HIGHLIGHT /* */ 0b0000010 // Highlight the asset
+#define DF_MIRROR_X /*  */ 0b0000100 // Mirror the asset on the x axis
 void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = DF_NONE)
 {
   x *= LD_ASSET_WIDTH;
   y *= LD_ASSET_HEIGHT + 1;
   y += 2; // Offset
 
-  disp->drawBitmap(
-      x,
-      y,
-      asset,
-      LD_ASSET_WIDTH,
-      LD_ASSET_HEIGHT,
-      1);
+  // Mirror the asset if needed
+  if (disp_flags & DF_MIRROR_X)
+  {
+    // copy the asset into a buffer
+    uint8_t buffer[LD_ASSET_WIDTH * LD_ASSET_HEIGHT];
+    memcpy_P(buffer, asset, LD_ASSET_WIDTH * LD_ASSET_HEIGHT);
+  }
+
+  // Color changes if the asset is highlighted
+  int color = 1;
+
+  if (disp_flags & DF_HIGHLIGHT)
+  {
+    disp->fillRect(x, y,
+                   LD_ASSET_WIDTH,
+                   LD_ASSET_HEIGHT,
+                   1);
+    color = 0;
+  }
+
+  disp->drawBitmap(x, y,
+                   asset,
+                   LD_ASSET_WIDTH,
+                   LD_ASSET_HEIGHT,
+                   color);
 
   if (disp_flags & DF_WIRE_UP_TO_NEXT)
   {
     const int line_x_offset = 8;
     const int line_y_offset = 2;
 
-    disp->drawLine(
-        x + line_x_offset,
-        y + line_y_offset,
-        x + line_x_offset,
-        y - (LD_ASSET_HEIGHT + (.5 * LD_ASSET_HEIGHT) + 1),
-        1);
+    disp->drawLine(x + line_x_offset,
+                   y + line_y_offset,
+                   x + line_x_offset,
+                   y - (LD_ASSET_HEIGHT + (.5 * LD_ASSET_HEIGHT) + 1),
+                   color);
   }
 }
 
@@ -232,8 +250,8 @@ void disp_highlight_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
 // NOTE: the length is the number of elements - 1 (its zero based)
 void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row)
 {
-  LOG("disp_draw_diagram: len: %i\n", length);
-  LOG("_________________NAME, COL, COR ROW\n");
+  // LOG("disp_draw_diagram: len: %i\n", length);
+  // LOG("_________________NAME, COL, COR ROW\n");
   for (int i = 0; i < length; i++)
   {
     GfxAsset element = dia->elements[i];
@@ -246,9 +264,9 @@ void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row)
       flags |= DF_WIRE_UP_TO_NEXT;
     }
 
-    int newRow = (row + element.row) * 2; // Inital offset
+    int newRow = ((row + element.row) * 2) - 1; // Inital offset, -1 for the menu bar that only takes one row
 
-    LOG("disp_draw_diagram: %s, %i, %i\n", element.name, element.col, newRow);
+    // LOG("disp_draw_diagram: %s, %i, %i\n", element.name, element.col, newRow);
 
     disp_draw_asset_on_grid(disp, element.asset, element.col, newRow + 1, flags);
     disp_draw_text_on_grid(disp, element.name, element.col, newRow);
@@ -295,14 +313,22 @@ void dsp_draw_ld_exp(DispPtr disp, String exp, String *err = NULL)
 }
 
 //---------------------------
-void editor_debug(EditorPtr editor, DispPtr disp)
+
+#define DEBUG_WIRE_ASSET(elemNo, __row, __cols, __diagramName) \
+  __diagramName.elements[elemNo].asset = WIRE;                 \
+  __diagramName.elements[elemNo].type = AT_Wire;               \
+  __diagramName.elements[elemNo].row = __row;                  \
+  __diagramName.elements[elemNo].col = __cols;                 \
+  __diagramName.elements[elemNo].name[0] = '\0';
+
+void editor_poc(EditorPtr editor, DispPtr disp)
 {
   GfxDiagram dbg_dgm = {};
-  dbg_dgm.elementCount = 5;
+  dbg_dgm.elementCount = 10;
 
   dbg_dgm.elements[0].asset = CONTACT_NO;
   dbg_dgm.elements[0].type = AT_ContactNo;
-  dbg_dgm.elements[0].row = 0;
+  dbg_dgm.elements[0].row = 1;
   dbg_dgm.elements[0].col = 0;
   dbg_dgm.elements[0].name[0] = 'I';
   dbg_dgm.elements[0].name[1] = ':';
@@ -312,7 +338,7 @@ void editor_debug(EditorPtr editor, DispPtr disp)
 
   dbg_dgm.elements[1].asset = CONTACT_NC;
   dbg_dgm.elements[1].type = AT_ContactNc;
-  dbg_dgm.elements[1].row = 1;
+  dbg_dgm.elements[1].row = 2;
   dbg_dgm.elements[1].col = 0;
   dbg_dgm.elements[1].name[0] = 'I';
   dbg_dgm.elements[1].name[1] = ':';
@@ -322,7 +348,7 @@ void editor_debug(EditorPtr editor, DispPtr disp)
 
   dbg_dgm.elements[2].asset = CONTACT_NC;
   dbg_dgm.elements[2].type = AT_ContactNc;
-  dbg_dgm.elements[2].row = 2;
+  dbg_dgm.elements[2].row = 3;
   dbg_dgm.elements[2].col = 0;
   dbg_dgm.elements[2].name[0] = 'I';
   dbg_dgm.elements[2].name[1] = ':';
@@ -332,41 +358,75 @@ void editor_debug(EditorPtr editor, DispPtr disp)
 
   dbg_dgm.elements[2].asset = WIRE;
   dbg_dgm.elements[2].type = AT_Wire;
-  dbg_dgm.elements[2].row = 0;
+  dbg_dgm.elements[2].row = 1;
   dbg_dgm.elements[2].col = 1;
   dbg_dgm.elements[2].name[0] = '\0';
 
   dbg_dgm.elements[3].asset = WIRE_UP_FROM_LEFT;
   dbg_dgm.elements[3].type = AT_WireUpFromLeft;
-  dbg_dgm.elements[3].row = 1;
+  dbg_dgm.elements[3].row = 2;
   dbg_dgm.elements[3].col = 1;
   dbg_dgm.elements[3].name[0] = '\0';
+
+  dbg_dgm.elements[4].asset = CONTACT_NC;
+  dbg_dgm.elements[4].type = AT_ContactNc;
+  dbg_dgm.elements[4].row = 1;
+  dbg_dgm.elements[4].col = 2;
+  dbg_dgm.elements[4].name[0] = 'I';
+  dbg_dgm.elements[4].name[1] = ':';
+  dbg_dgm.elements[4].name[2] = '0';
+  dbg_dgm.elements[4].name[3] = '3';
+  dbg_dgm.elements[4].name[4] = '\0';
+
+  DEBUG_WIRE_ASSET(5, 1, 3, dbg_dgm);
+  DEBUG_WIRE_ASSET(6, 1, 4, dbg_dgm);
+  DEBUG_WIRE_ASSET(7, 1, 5, dbg_dgm);
+
+  dbg_dgm.elements[8].asset = LOAD_COIL;
+  dbg_dgm.elements[8].type = AT_LoadCoil;
+  dbg_dgm.elements[8].row = 1;
+  dbg_dgm.elements[8].col = 6;
+  dbg_dgm.elements[8].name[0] = 'O';
+  dbg_dgm.elements[8].name[1] = ':';
+  dbg_dgm.elements[8].name[2] = '0';
+  dbg_dgm.elements[8].name[3] = '0';
+  dbg_dgm.elements[8].name[4] = '\0';
 
   disp_draw_diagram(disp, &dbg_dgm, dbg_dgm.elementCount - 1, 0);
 }
 
+void editor_toolbar_poc(EditorPtr editor, DispPtr disp)
+{
+  disp_draw_asset_on_grid(disp, UI_BACKARROW, 0, 0);
+  disp_draw_asset_on_grid(disp, CONTACT_NO, 1, 0);
+  disp_draw_asset_on_grid(disp, CONTACT_NC, 2, 0, DF_HIGHLIGHT);
+  disp_draw_asset_on_grid(disp, LOAD_COIL, 3, 0);
+  disp_draw_asset_on_grid(disp, LOAD_LATCH, 4, 0);
+  disp_draw_asset_on_grid(disp, LOAD_RESET, 5, 0);
+  disp_draw_asset_on_grid(disp, UI_BACKARROW, 6, 0, DF_MIRROR_X);
+
+  // disp_draw_asset_on_grid(disp, LOAD_ADD, 0, 1);
+  // disp_draw_asset_on_grid(disp, LOAD_SUB, 1, 1);
+  // disp_draw_asset_on_grid(disp, LOAD_MUT, 2, 1);
+  // disp_draw_asset_on_grid(disp, LOAD_DIV, 3, 1);
+}
+
+void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
+{
+  while (true)
+  {
+    disp->clearDisplay();
+    disp->setCursor(0, 0);
+    editor_toolbar_poc(editor, disp);
+    editor_poc(editor, disp);
+    disp->display();
+    delay(1000);
+  }
+}
+
 void editor_ui(EditorPtr editor, DispPtr disp)
 {
-  disp->clearDisplay();
-  disp->setCursor(0, 0);
-  editor_debug(editor, disp);
-  disp->display();
-  return;
-  disp_draw_asset_on_grid(disp, CONTACT_NO, 0, 0);
-  disp_highlight_asset_on_grid(disp, CONTACT_NC, 1, 0);
-  disp_draw_asset_on_grid(disp, LOAD_COIL, 2, 0);
-  disp_draw_asset_on_grid(disp, LOAD_LATCH, 3, 0);
-  disp_draw_asset_on_grid(disp, LOAD_RESET, 4, 0);
-
-  disp_draw_asset_on_grid(disp, LOAD_ADD, 0, 1);
-  disp_draw_asset_on_grid(disp, LOAD_SUB, 1, 1);
-  disp_draw_asset_on_grid(disp, LOAD_MUT, 2, 1);
-  disp_draw_asset_on_grid(disp, LOAD_DIV, 3, 1);
-  disp_draw_asset_on_grid(disp, UI_BACKSPACE, 4, 1);
-
-  // disp_draw_labled_asset_on_grid(disp, "  s S b B m  M :00", LOAD_COIL, 3, 0);
-
-  disp->display();
+  do_poc_loop_no_return(editor, disp);
 }
 
 Disp display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
