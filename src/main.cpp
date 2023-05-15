@@ -35,11 +35,12 @@ typedef const uint8_t PROGMEM *AssetPtr;
 #define LOAD_DIV epd_bitmap_LD_09
 #define LOAD_MOVE epd_bitmap_LD_10
 
-#define WIRE_UP_FROM_LEFT epd_bitmap_LD_12
-#define WIRE_UP_FROM_RIGHT epd_bitmap_LD_13
-#define WIRE epd_bitmap_LD_14
-
 #define UI_BACKARROW epd_bitmap_LD_11
+#define UI_FORWARDARROW epd_bitmap_LD_12
+
+#define WIRE_UP_FROM_LEFT epd_bitmap_LD_13
+#define WIRE_UP_FROM_RIGHT epd_bitmap_LD_14
+#define WIRE epd_bitmap_LD_15
 
 typedef enum
 {
@@ -62,9 +63,6 @@ typedef enum
 } AssetType;
 
 // Asset images converted with https://javl.github.io/image2cpp/
-// 'LD_00', 17x5px
-const unsigned char epd_bitmap_LD_00[] PROGMEM = {
-    0xaa, 0xaa, 0x80, 0x55, 0x55, 0x00, 0xaa, 0xaa, 0x80, 0x55, 0x55, 0x00, 0xaa, 0xaa, 0x80};
 // 'LD_01', 17x5px
 const unsigned char epd_bitmap_LD_01[] PROGMEM = {
     0x02, 0x20, 0x00, 0x02, 0x60, 0x00, 0xfe, 0xbf, 0x80, 0x03, 0x20, 0x00, 0x02, 0x20, 0x00};
@@ -100,14 +98,16 @@ const unsigned char epd_bitmap_LD_11[] PROGMEM = {
     0x10, 0x00, 0x00, 0x30, 0x00, 0x00, 0x7f, 0xfe, 0x00, 0x30, 0x00, 0x00, 0x10, 0x00, 0x00};
 // 'LD_12', 17x5px
 const unsigned char epd_bitmap_LD_12[] PROGMEM = {
-    0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    0x00, 0x04, 0x00, 0x00, 0x06, 0x00, 0x3f, 0xff, 0x00, 0x00, 0x06, 0x00, 0x00, 0x04, 0x00};
 // 'LD_13', 17x5px
 const unsigned char epd_bitmap_LD_13[] PROGMEM = {
-    0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 // 'LD_14', 17x5px
 const unsigned char epd_bitmap_LD_14[] PROGMEM = {
+    0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+// 'LD_15', 17x5px
+const unsigned char epd_bitmap_LD_15[] PROGMEM = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
 #define DIAGRAM_MAX_ELEMENTS 20
 #define ASSET_MAX_NAME_LENGTH 5
 // #define ASSET_MAX_DATA_LENGTH 10
@@ -147,12 +147,61 @@ typedef enum
   EAT_BitOpperators, // NO, NC, COIL, LATCH, RESET
   EAT_Arithmatic,    // ADD, SUB, MUT, DIV
                      // Perhaps a category for the "special" keys like backspace, and the save menu or something
+
+  EAT_Wires, // WIRE_UP_FROM_LEFT, WIRE_UP_FROM_RIGHT, WIRE
+
 } Editor_ActiveToolbar;
+
+// NOTE! The order of these items must match the order of the items in the UI Toolbar
+typedef enum
+{
+  ECT_ContactNo,
+  ECT_ContactNc,
+  ECT_LoadCoil,
+  ECT_LoadLatch,
+  ECT_LoadReset,
+  ECT_LoadAdd,
+  ECT_LoadSub,
+  ECT_LoadMut,
+  ECT_LoadDiv,
+  ECT_LoadMove,
+  ECT_WireUpFromLeft,
+  ECT_Wire,
+  ECT_WireUpFromRight,
+  ETC_CURRENTLY_SELECTED_TOOLBAR_ITEM_COUNT,
+} Editor_CurrentlySelectedToolbarItem;
+
+Editor_ActiveToolbar GetToolbarFromItem(Editor_CurrentlySelectedToolbarItem item)
+{
+  switch (item)
+  {
+  case ECT_ContactNo:
+  case ECT_ContactNc:
+  case ECT_LoadCoil:
+  case ECT_LoadLatch:
+  case ECT_LoadReset:
+    return EAT_BitOpperators;
+  case ECT_LoadAdd:
+  case ECT_LoadSub:
+  case ECT_LoadMut:
+  case ECT_LoadDiv:
+  case ECT_LoadMove:
+    return EAT_Arithmatic;
+  case ECT_WireUpFromLeft:
+  case ECT_WireUpFromRight:
+  case ECT_Wire:
+    return EAT_Wires;
+  default:
+    LOG("GetToolbarFromItem: Unknown item: %i\n", item);
+    return EAT_BitOpperators;
+  }
+}
 
 /// @brief Editor state
 typedef struct
 {
-  Editor_ActiveToolbar activeToolbar;
+  // what item withn the toolbar is selected
+  Editor_CurrentlySelectedToolbarItem selectedToolbarItem;
 } Editor;
 
 typedef Editor *EditorPtr;
@@ -160,20 +209,14 @@ typedef Editor *EditorPtr;
 #define DF_NONE /*      */ 0b0000000
 #define DF_WIRE_UP_TO_NEXT 0b0000001 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
 #define DF_HIGHLIGHT /* */ 0b0000010 // Highlight the asset
-#define DF_MIRROR_X /*  */ 0b0000100 // Mirror the asset on the x axis
+
 void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = DF_NONE)
 {
   x *= LD_ASSET_WIDTH;
+  x += 2; // Offset
+
   y *= LD_ASSET_HEIGHT + 1;
   y += 2; // Offset
-
-  // Mirror the asset if needed
-  if (disp_flags & DF_MIRROR_X)
-  {
-    // copy the asset into a buffer
-    uint8_t buffer[LD_ASSET_WIDTH * LD_ASSET_HEIGHT];
-    memcpy_P(buffer, asset, LD_ASSET_WIDTH * LD_ASSET_HEIGHT);
-  }
 
   // Color changes if the asset is highlighted
   int color = 1;
@@ -394,33 +437,56 @@ void editor_poc(EditorPtr editor, DispPtr disp)
 
   disp_draw_diagram(disp, &dbg_dgm, dbg_dgm.elementCount - 1, 0);
 }
+// editor->selectedToolbarItem == ECT_Back ? DF_HIGHLIGHT : DF_NONE
+#define TOOLBAR_HIGHLIGHT(__ASSET, __ECT, __ITEM_CTR) \
+  disp_draw_asset_on_grid(disp, __ASSET, __ITEM_CTR++, 0, editor->selectedToolbarItem == __ECT ? DF_HIGHLIGHT : DF_NONE);
 
-void editor_toolbar_poc(EditorPtr editor, DispPtr disp)
+void editor_draw_toolbar(EditorPtr editor, DispPtr disp)
 {
-  disp_draw_asset_on_grid(disp, UI_BACKARROW, 0, 0);
-  disp_draw_asset_on_grid(disp, CONTACT_NO, 1, 0);
-  disp_draw_asset_on_grid(disp, CONTACT_NC, 2, 0, DF_HIGHLIGHT);
-  disp_draw_asset_on_grid(disp, LOAD_COIL, 3, 0);
-  disp_draw_asset_on_grid(disp, LOAD_LATCH, 4, 0);
-  disp_draw_asset_on_grid(disp, LOAD_RESET, 5, 0);
-  disp_draw_asset_on_grid(disp, UI_BACKARROW, 6, 0, DF_MIRROR_X);
+  // ui nav controls
+  int item = 1;
 
-  // disp_draw_asset_on_grid(disp, LOAD_ADD, 0, 1);
-  // disp_draw_asset_on_grid(disp, LOAD_SUB, 1, 1);
-  // disp_draw_asset_on_grid(disp, LOAD_MUT, 2, 1);
-  // disp_draw_asset_on_grid(disp, LOAD_DIV, 3, 1);
+  auto toolbar = GetToolbarFromItem(editor->selectedToolbarItem);
+
+  switch (toolbar)
+  {
+  case EAT_BitOpperators:
+    TOOLBAR_HIGHLIGHT(CONTACT_NO, ECT_ContactNo, item)
+    TOOLBAR_HIGHLIGHT(CONTACT_NC, ECT_ContactNc, item)
+    TOOLBAR_HIGHLIGHT(LOAD_COIL, ECT_LoadCoil, item)
+    TOOLBAR_HIGHLIGHT(LOAD_LATCH, ECT_LoadLatch, item)
+    TOOLBAR_HIGHLIGHT(LOAD_RESET, ECT_LoadReset, item)
+    break;
+  case EAT_Arithmatic:
+    TOOLBAR_HIGHLIGHT(LOAD_ADD, ECT_LoadAdd, item)
+    TOOLBAR_HIGHLIGHT(LOAD_SUB, ECT_LoadSub, item)
+    TOOLBAR_HIGHLIGHT(LOAD_MUT, ECT_LoadMut, item)
+    TOOLBAR_HIGHLIGHT(LOAD_DIV, ECT_LoadDiv, item)
+    TOOLBAR_HIGHLIGHT(LOAD_MOVE, ECT_LoadMove, item)
+    break;
+  case EAT_Wires:
+    TOOLBAR_HIGHLIGHT(WIRE_UP_FROM_LEFT, ECT_WireUpFromLeft, item)
+    TOOLBAR_HIGHLIGHT(WIRE, ECT_Wire, item)
+    TOOLBAR_HIGHLIGHT(WIRE_UP_FROM_RIGHT, ECT_WireUpFromRight, item)
+  default:
+    LOG("editor_draw_toolbar: Unknown toolbar type: %i\n", toolbar);
+    break;
+  }
 }
 
 void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
 {
   while (true)
   {
+
     disp->clearDisplay();
     disp->setCursor(0, 0);
-    editor_toolbar_poc(editor, disp);
+    editor_draw_toolbar(editor, disp);
     editor_poc(editor, disp);
     disp->display();
     delay(1000);
+
+    editor->selectedToolbarItem = (Editor_CurrentlySelectedToolbarItem)((editor->selectedToolbarItem + 1) % ETC_CURRENTLY_SELECTED_TOOLBAR_ITEM_COUNT);
   }
 }
 
