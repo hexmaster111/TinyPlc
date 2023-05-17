@@ -42,78 +42,49 @@ typedef const uint8_t PROGMEM *AssetPtr;
 #define WIRE_UP_FROM_RIGHT epd_bitmap_LD_14
 #define WIRE epd_bitmap_LD_15
 
-typedef enum
-{
-  AT_ContactNc = 0,
-  AT_ContactNo,
-  AT_LoadCoil,
-  AT_LoadLatch,
-  AT_LoadReset,
-
-  AT_LoadAdd = 100,
-  AT_LoadSub,
-  AT_LoadMut,
-  AT_LoadDiv,
-
-  AT_LoadMove = 200,
-
-  AT_WireUpFromLeft = 300,
-  AT_WireUpFromRight,
-  AT_Wire,
-} AssetType;
-
 // Asset images converted with https://javl.github.io/image2cpp/
-// 'LD_01', 17x5px
-const unsigned char epd_bitmap_LD_01[] PROGMEM = {
-    0x02, 0x20, 0x00, 0x02, 0x60, 0x00, 0xfe, 0xbf, 0x80, 0x03, 0x20, 0x00, 0x02, 0x20, 0x00};
-// 'LD_02', 17x5px
-const unsigned char epd_bitmap_LD_02[] PROGMEM = {
-    0x02, 0x20, 0x00, 0x02, 0x20, 0x00, 0xfe, 0x3f, 0x80, 0x02, 0x20, 0x00, 0x02, 0x20, 0x00};
-// 'LD_03', 17x5px
-const unsigned char epd_bitmap_LD_03[] PROGMEM = {
-    0x04, 0x10, 0x00, 0x08, 0x08, 0x00, 0xf8, 0x0f, 0x80, 0x08, 0x08, 0x00, 0x04, 0x10, 0x00};
-// 'LD_04', 17x5px
-const unsigned char epd_bitmap_LD_04[] PROGMEM = {
-    0x05, 0x10, 0x00, 0x09, 0x08, 0x00, 0xf9, 0x0f, 0x80, 0x09, 0x08, 0x00, 0x05, 0xd0, 0x00};
-// 'LD_05', 17x5px
-const unsigned char epd_bitmap_LD_05[] PROGMEM = {
-    0x05, 0xd0, 0x00, 0x09, 0x48, 0x00, 0xf9, 0xcf, 0x80, 0x09, 0x88, 0x00, 0x05, 0x50, 0x00};
-// 'LD_06', 17x5px
-const unsigned char epd_bitmap_LD_06[] PROGMEM = {
-    0x19, 0x98, 0x00, 0x25, 0x54, 0x00, 0xbd, 0x54, 0x80, 0x25, 0x54, 0x00, 0x25, 0x98, 0x00};
-// 'LD_07', 17x5px
-const unsigned char epd_bitmap_LD_07[] PROGMEM = {
-    0x1a, 0x58, 0x00, 0x22, 0x54, 0x00, 0x9a, 0x58, 0x80, 0x0a, 0x54, 0x00, 0x31, 0x98, 0x00};
-// 'LD_08', 17x5px
-const unsigned char epd_bitmap_LD_08[] PROGMEM = {
-    0x22, 0x97, 0x00, 0x36, 0x92, 0x00, 0xaa, 0x92, 0x80, 0x22, 0x92, 0x00, 0x22, 0xf2, 0x00};
-// 'LD_09', 17x5px
-const unsigned char epd_bitmap_LD_09[] PROGMEM = {
-    0x33, 0xa8, 0x00, 0x29, 0x28, 0x00, 0xa9, 0x28, 0x80, 0x29, 0x28, 0x00, 0x33, 0x90, 0x00};
-// 'LD_10', 17x5px
-const unsigned char epd_bitmap_LD_10[] PROGMEM = {
-    0x22, 0xea, 0x00, 0x36, 0xaa, 0x00, 0xaa, 0xaa, 0x80, 0x22, 0xaa, 0x00, 0x22, 0xe4, 0x00};
-// 'LD_11', 17x5px
-const unsigned char epd_bitmap_LD_11[] PROGMEM = {
-    0x10, 0x00, 0x00, 0x30, 0x00, 0x00, 0x7f, 0xfe, 0x00, 0x30, 0x00, 0x00, 0x10, 0x00, 0x00};
-// 'LD_12', 17x5px
-const unsigned char epd_bitmap_LD_12[] PROGMEM = {
-    0x00, 0x04, 0x00, 0x00, 0x06, 0x00, 0x3f, 0xff, 0x00, 0x00, 0x06, 0x00, 0x00, 0x04, 0x00};
-// 'LD_13', 17x5px
-const unsigned char epd_bitmap_LD_13[] PROGMEM = {
-    0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-// 'LD_14', 17x5px
-const unsigned char epd_bitmap_LD_14[] PROGMEM = {
-    0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-// 'LD_15', 17x5px
-const unsigned char epd_bitmap_LD_15[] PROGMEM = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const unsigned char epd_bitmap_LD_01[] PROGMEM = {0x02, 0x20, 0x00, 0x02, 0x60, 0x00, 0xfe, 0xbf, 0x80, 0x03, 0x20, 0x00, 0x02, 0x20, 0x00};
+const unsigned char epd_bitmap_LD_02[] PROGMEM = {0x02, 0x20, 0x00, 0x02, 0x20, 0x00, 0xfe, 0x3f, 0x80, 0x02, 0x20, 0x00, 0x02, 0x20, 0x00};
+const unsigned char epd_bitmap_LD_03[] PROGMEM = {0x04, 0x10, 0x00, 0x08, 0x08, 0x00, 0xf8, 0x0f, 0x80, 0x08, 0x08, 0x00, 0x04, 0x10, 0x00};
+const unsigned char epd_bitmap_LD_04[] PROGMEM = {0x05, 0x10, 0x00, 0x09, 0x08, 0x00, 0xf9, 0x0f, 0x80, 0x09, 0x08, 0x00, 0x05, 0xd0, 0x00};
+const unsigned char epd_bitmap_LD_05[] PROGMEM = {0x05, 0xd0, 0x00, 0x09, 0x48, 0x00, 0xf9, 0xcf, 0x80, 0x09, 0x88, 0x00, 0x05, 0x50, 0x00};
+const unsigned char epd_bitmap_LD_06[] PROGMEM = {0x19, 0x98, 0x00, 0x25, 0x54, 0x00, 0xbd, 0x54, 0x80, 0x25, 0x54, 0x00, 0x25, 0x98, 0x00};
+const unsigned char epd_bitmap_LD_07[] PROGMEM = {0x1a, 0x58, 0x00, 0x22, 0x54, 0x00, 0x9a, 0x58, 0x80, 0x0a, 0x54, 0x00, 0x31, 0x98, 0x00};
+const unsigned char epd_bitmap_LD_08[] PROGMEM = {0x22, 0x97, 0x00, 0x36, 0x92, 0x00, 0xaa, 0x92, 0x80, 0x22, 0x92, 0x00, 0x22, 0xf2, 0x00};
+const unsigned char epd_bitmap_LD_09[] PROGMEM = {0x33, 0xa8, 0x00, 0x29, 0x28, 0x00, 0xa9, 0x28, 0x80, 0x29, 0x28, 0x00, 0x33, 0x90, 0x00};
+const unsigned char epd_bitmap_LD_10[] PROGMEM = {0x22, 0xea, 0x00, 0x36, 0xaa, 0x00, 0xaa, 0xaa, 0x80, 0x22, 0xaa, 0x00, 0x22, 0xe4, 0x00};
+const unsigned char epd_bitmap_LD_11[] PROGMEM = {0x10, 0x00, 0x00, 0x30, 0x00, 0x00, 0x7f, 0xfe, 0x00, 0x30, 0x00, 0x00, 0x10, 0x00, 0x00};
+const unsigned char epd_bitmap_LD_12[] PROGMEM = {0x00, 0x04, 0x00, 0x00, 0x06, 0x00, 0x3f, 0xff, 0x00, 0x00, 0x06, 0x00, 0x00, 0x04, 0x00};
+const unsigned char epd_bitmap_LD_13[] PROGMEM = {0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const unsigned char epd_bitmap_LD_14[] PROGMEM = {0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const unsigned char epd_bitmap_LD_15[] PROGMEM = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 #define DIAGRAM_MAX_ELEMENTS 20
-#define ASSET_MAX_NAME_LENGTH 5
-// #define ASSET_MAX_DATA_LENGTH 10
+#define ASSET_MAX_DATA_LENGTH 14
 
 typedef Adafruit_SSD1306 Disp;
 typedef Disp *DispPtr;
+
+typedef enum
+{
+  AT_ContactNc = 0, // data[0..3] = "I:00" - Bit IO Name
+  AT_ContactNo,     // data[0..3] = "I:00" - Bit IO Name
+  AT_LoadCoil,      // data[0..3] = "O:00" - Bit IO Name
+  AT_LoadLatch,     // data[0..3] = "O:00" - Bit IO Name
+  AT_LoadReset,     // data[0..3] = "O:00" - Bit IO Name
+
+  AT_LoadAdd = 100, // data[0..3] = Dest Name    data[4..8] = source A name    data[9..13] = source B name DEST = A + B
+  AT_LoadSub,       // data[0..3] = Dest Name    data[4..8] = source A name    data[9..13] = source B name DEST = A - B
+  AT_LoadMut,       // data[0..3] = Dest Name    data[4..8] = source A name    data[9..13] = source B name DEST = A * B
+  AT_LoadDiv,       // data[0..3] = Dest Name    data[4..8] = source A name    data[9..13] = source B name DEST = A / B
+
+  AT_LoadMove = 200, // data[0..3] = Dest Name    data[4..8] = source A name
+
+  AT_ContactCompare = 300, // Data[0..3] = source A name    data[4..8] = source B name  data[10] Opperator
+
+  AT_WireUpFromLeft = 900,
+  AT_WireUpFromRight,
+  AT_Wire,
+} AssetType;
 
 /// @brief A single item on the diagram
 typedef struct
@@ -124,14 +95,15 @@ typedef struct
   // type of asset
   AssetType type;
 
-  // name of the asset
-  char name[ASSET_MAX_NAME_LENGTH];
+  // Data for this asset
+  char data[ASSET_MAX_DATA_LENGTH];
 
   // TODO: data for the asset, like the value of a coil, or the name of a variable, etc
 
   uint8_t row; // Row, or x
   uint8_t col; // Column, or y
 } GfxAsset;
+typedef GfxAsset *GfxAssetPtr;
 
 /// @brief A single diagram, there may be multiple diagrams in a single document
 typedef struct
@@ -140,6 +112,14 @@ typedef struct
   uint8_t elementCount;
 } GfxDiagram;
 typedef GfxDiagram *GfxDiagramPtr;
+
+typedef struct
+{
+  GfxDiagram diagrams[DIAGRAM_MAX_ELEMENTS];
+  uint8_t diagramCount;
+} GfxDocument;
+
+typedef GfxDocument *GfxDocumentPtr;
 
 //---------------------------
 typedef enum
@@ -202,6 +182,7 @@ typedef struct
 {
   // what item withn the toolbar is selected
   Editor_CurrentlySelectedToolbarItem selectedToolbarItem;
+  GfxDocument document;
 } Editor;
 
 typedef Editor *EditorPtr;
@@ -209,7 +190,6 @@ typedef Editor *EditorPtr;
 #define DF_NONE /*      */ 0b0000000
 #define DF_WIRE_UP_TO_NEXT 0b0000001 // Extend the WIRE_UP_FROM_LEFT asset up to the connecting line
 #define DF_HIGHLIGHT /* */ 0b0000010 // Highlight the asset
-
 void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_t disp_flags = DF_NONE)
 {
   x *= LD_ASSET_WIDTH;
@@ -249,16 +229,12 @@ void disp_draw_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y, u_int8_
   }
 }
 
-void disp_draw_text_on_grid(DispPtr disp, String text, int x, int y)
+void disp_draw_text_on_grid(DispPtr disp, String text, int x, int y, int x_offset = 0)
 {
   x *= LD_ASSET_WIDTH;
   y += 1; // Next Line
   y *= LD_ASSET_HEIGHT + 1;
-
-  disp->setCursor(
-      x,
-      y);
-
+  disp->setCursor(x + x_offset, y);
   disp->print(text);
 }
 
@@ -290,69 +266,136 @@ void disp_highlight_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
       0);
 }
 
-// NOTE: the length is the number of elements - 1 (its zero based)
-void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row)
+// y offset + (Element number * height of element) + 1PX offset + (Height of the font + Height of the already printed title)
+// disp->setCursor(x, y + (FONT_HEIGHT * i) + 1 + (FONT_HEIGHT * 2));
+// disp->print(" ");
+// disp->print("SRC");
+// disp->print(": ");
+// disp->print(lables[0]);
+// disp->print(lables[1]);
+// disp->print(lables[2]);
+// disp->println(lables[3]);
+// i++;
+#define PRINT_LABEL_ELEMENT(__LABEL, __STARTINGINDEX)                \
+  disp->setCursor(x, y + (FONT_HEIGHT * i) + 1 + (FONT_HEIGHT * 2)); \
+  disp->print(" ");                                                  \
+  disp->print(__LABEL);                                              \
+  disp->print(": ");                                                 \
+  disp->print(lables[__STARTINGINDEX]);                              \
+  disp->print(lables[__STARTINGINDEX + 1]);                          \
+  disp->print(lables[__STARTINGINDEX + 2]);                          \
+  disp->println(lables[__STARTINGINDEX + 3]);                        \
+  i++;
+
+#define DFB_NONE 0b00000000
+#define DFB__SRC 0b00000001 // lables[0..3]
+#define DFB__DST 0b00000010 // labels[4..7]
+#define DFB__OPP 0b00000100 // labels[0..3]
+#define DFB__SRA 0b00001000 // labels[4..7]
+#define DFB__SRB 0b00010000 // labels[7..11]
+
+/// @brief Draw a function block
+/// @param disp  Display to draw on
+/// @param x  X position of the block
+/// @param y  Y position of the block
+/// @param lables Array of strings to print See DFB__* for the index of each string
+/// @param title Title of the block
+/// @param dfb_flags Flags to control what is printed
+void disp_draw_function_block(DispPtr disp, int x, int y, char *lables, const char *title, u_int8_t dfb_flags = DFB_NONE)
 {
-  // LOG("disp_draw_diagram: len: %i\n", length);
+  disp->setCursor(x, y + FONT_HEIGHT);
+  disp->print("     ");
+  disp->println(title);
+  int i = 0;
+
+  if (dfb_flags & DFB__SRC)
+  {
+    PRINT_LABEL_ELEMENT("SRC", 0);
+  }
+  if (dfb_flags & DFB__DST)
+  {
+    PRINT_LABEL_ELEMENT("DST", 4);
+  }
+
+  if (dfb_flags & DFB__OPP)
+  {
+    PRINT_LABEL_ELEMENT("OPP", 0);
+  }
+
+  if (dfb_flags & DFB__SRA)
+  {
+    PRINT_LABEL_ELEMENT("SRA", 4);
+  }
+
+  if (dfb_flags & DFB__SRB)
+  {
+    PRINT_LABEL_ELEMENT("SRB", 7);
+  }
+
+  disp->drawRect(x, y,
+                 LD_ASSET_WIDTH * 2,
+                 LD_ASSET_HEIGHT * (i + 3) - 1,
+                 1);
+}
+
+void __disp_draw_simple_asset(DispPtr disp, GfxAssetPtr asset, AssetPtr sprite, int newRow)
+{
+  disp_draw_text_on_grid(disp, asset->data, asset->col, newRow, 5);
+
+  disp_draw_asset_on_grid(disp, sprite, asset->col, newRow + 1, DF_NONE);
+}
+void __disp_draw_wire(DispPtr disp, GfxAssetPtr asset, int newRow, u_int8_t flags)
+{
+  disp_draw_asset_on_grid(disp, asset->asset, asset->col, newRow + 1, flags);
+}
+
+void __disp_draw_fb(DispPtr disp, GfxAssetPtr asset, int newRow, const char *title)
+{
+  int x = (asset->col * LD_ASSET_WIDTH) + 2;
+  int y = (newRow + 1) * LD_ASSET_HEIGHT;
+  disp_draw_function_block(disp, x, y, asset->data, (char *)title, DFB__SRC | DFB__DST);
+}
+
+#define CASE_DO_BREAK(__CASE, __FUNC) \
+  case __CASE:                        \
+    __FUNC;                           \
+    break;
+
+// NOTE: the length is the number of elements - 1 (its zero based)
+void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row_to_draw_on)
+{
   // LOG("_________________NAME, COL, COR ROW\n");
+  // LOG("disp_draw_diagram: len: %i\n", length);
   for (int i = 0; i < length; i++)
   {
     GfxAsset element = dia->elements[i];
+    int newRow = ((row_to_draw_on + (element.row + 1)) * 2) - 1; // Inital offset, -1 for the menu bar that only takes one row
 
     u_int8_t flags = DF_NONE;
 
-    if (element.type == AT_WireUpFromLeft ||
-        element.type == AT_WireUpFromRight)
+    switch (element.type)
     {
+
+      CASE_DO_BREAK(AT_ContactNc, __disp_draw_simple_asset(disp, &element, CONTACT_NC, newRow))
+      CASE_DO_BREAK(AT_ContactNo, __disp_draw_simple_asset(disp, &element, CONTACT_NO, newRow))
+      CASE_DO_BREAK(AT_LoadCoil, __disp_draw_simple_asset(disp, &element, LOAD_COIL, newRow))
+      CASE_DO_BREAK(AT_LoadLatch, __disp_draw_simple_asset(disp, &element, LOAD_LATCH, newRow))
+      CASE_DO_BREAK(AT_LoadReset, __disp_draw_simple_asset(disp, &element, LOAD_RESET, newRow))
+
+      CASE_DO_BREAK(AT_LoadAdd, __disp_draw_fb(disp, &element, newRow, "ADD"))
+      CASE_DO_BREAK(AT_LoadSub, __disp_draw_fb(disp, &element, newRow, "SUB"))
+      CASE_DO_BREAK(AT_LoadMut, __disp_draw_fb(disp, &element, newRow, "MUT"))
+      CASE_DO_BREAK(AT_LoadDiv, __disp_draw_fb(disp, &element, newRow, "DIV"))
+      CASE_DO_BREAK(AT_LoadMove, __disp_draw_fb(disp, &element, newRow, "MOV"))
+
+    case AT_WireUpFromLeft:
+    case AT_WireUpFromRight:
       flags |= DF_WIRE_UP_TO_NEXT;
+    case AT_Wire:
+      __disp_draw_wire(disp, &element, newRow, flags);
+      continue;
     }
-
-    int newRow = ((row + element.row) * 2) - 1; // Inital offset, -1 for the menu bar that only takes one row
-
-    // LOG("disp_draw_diagram: %s, %i, %i\n", element.name, element.col, newRow);
-
-    disp_draw_asset_on_grid(disp, element.asset, element.col, newRow + 1, flags);
-    disp_draw_text_on_grid(disp, element.name, element.col, newRow);
   }
-}
-
-void disp_test_drawing(DispPtr display)
-{
-  display->clearDisplay();
-  disp_draw_labled_asset_on_grid(display, "I:00", CONTACT_NO, 0, 0);
-  disp_draw_labled_asset_on_grid(display, "O:00", CONTACT_NO, 0, 2);
-  disp_draw_asset_on_grid(display, WIRE_UP_FROM_LEFT, 1, 3, DF_WIRE_UP_TO_NEXT);
-  disp_draw_asset_on_grid(display, WIRE, 1, 1);
-  disp_draw_labled_asset_on_grid(display, "I:01", CONTACT_NC, 2, 0);
-  disp_draw_asset_on_grid(display, WIRE, 3, 1);
-  disp_draw_labled_asset_on_grid(display, "I:02", CONTACT_NO, 4, 0);
-  disp_draw_asset_on_grid(display, WIRE_UP_FROM_RIGHT, 3, 3, DF_WIRE_UP_TO_NEXT);
-  disp_draw_labled_asset_on_grid(display, "I:03", CONTACT_NC, 4, 2);
-  disp_draw_asset_on_grid(display, WIRE_UP_FROM_LEFT, 5, 3, DF_WIRE_UP_TO_NEXT);
-  disp_draw_asset_on_grid(display, WIRE, 5, 1);
-  disp_draw_labled_asset_on_grid(display, "O:00", LOAD_COIL, 6, 0);
-  disp_draw_asset_on_grid(display, WIRE, 7, 1);
-
-  disp_draw_asset_on_grid(display, WIRE, 0, 4);
-  disp_draw_asset_on_grid(display, WIRE, 1, 4);
-  disp_draw_asset_on_grid(display, WIRE, 2, 4);
-  disp_draw_asset_on_grid(display, WIRE, 3, 4);
-  disp_draw_asset_on_grid(display, WIRE, 4, 4);
-  disp_draw_asset_on_grid(display, WIRE, 5, 4);
-  disp_draw_asset_on_grid(display, WIRE, 6, 4);
-  disp_draw_asset_on_grid(display, WIRE, 7, 4);
-  disp_draw_text_on_grid(display, "O:00=((I:00|O:00)&I:01&(I:02|!I:03))", 0, 5);
-  display->display();
-}
-
-/// @brief  Attempts to draw a logic diagram expression on the display
-/// @param disp Display to draw on
-/// @param exp  Expression to draw
-/// @param err  Error message if expression is invalid
-void dsp_draw_ld_exp(DispPtr disp, String exp, String *err = NULL)
-{
-
-  // Example expression: O:00=((I:00|O:00)&I:01&(I:02|!I:03))
 }
 
 //---------------------------
@@ -361,83 +404,8 @@ void dsp_draw_ld_exp(DispPtr disp, String exp, String *err = NULL)
   __diagramName.elements[elemNo].asset = WIRE;                 \
   __diagramName.elements[elemNo].type = AT_Wire;               \
   __diagramName.elements[elemNo].row = __row;                  \
-  __diagramName.elements[elemNo].col = __cols;                 \
-  __diagramName.elements[elemNo].name[0] = '\0';
+  __diagramName.elements[elemNo].col = __cols;
 
-void editor_poc(EditorPtr editor, DispPtr disp)
-{
-  GfxDiagram dbg_dgm = {};
-  dbg_dgm.elementCount = 10;
-
-  dbg_dgm.elements[0].asset = CONTACT_NO;
-  dbg_dgm.elements[0].type = AT_ContactNo;
-  dbg_dgm.elements[0].row = 1;
-  dbg_dgm.elements[0].col = 0;
-  dbg_dgm.elements[0].name[0] = 'I';
-  dbg_dgm.elements[0].name[1] = ':';
-  dbg_dgm.elements[0].name[2] = '0';
-  dbg_dgm.elements[0].name[3] = '0';
-  dbg_dgm.elements[0].name[4] = '\0';
-
-  dbg_dgm.elements[1].asset = CONTACT_NC;
-  dbg_dgm.elements[1].type = AT_ContactNc;
-  dbg_dgm.elements[1].row = 2;
-  dbg_dgm.elements[1].col = 0;
-  dbg_dgm.elements[1].name[0] = 'I';
-  dbg_dgm.elements[1].name[1] = ':';
-  dbg_dgm.elements[1].name[2] = '0';
-  dbg_dgm.elements[1].name[3] = '1';
-  dbg_dgm.elements[1].name[4] = '\0';
-
-  dbg_dgm.elements[2].asset = CONTACT_NC;
-  dbg_dgm.elements[2].type = AT_ContactNc;
-  dbg_dgm.elements[2].row = 3;
-  dbg_dgm.elements[2].col = 0;
-  dbg_dgm.elements[2].name[0] = 'I';
-  dbg_dgm.elements[2].name[1] = ':';
-  dbg_dgm.elements[2].name[2] = '0';
-  dbg_dgm.elements[2].name[3] = '2';
-  dbg_dgm.elements[2].name[4] = '\0';
-
-  dbg_dgm.elements[2].asset = WIRE;
-  dbg_dgm.elements[2].type = AT_Wire;
-  dbg_dgm.elements[2].row = 1;
-  dbg_dgm.elements[2].col = 1;
-  dbg_dgm.elements[2].name[0] = '\0';
-
-  dbg_dgm.elements[3].asset = WIRE_UP_FROM_LEFT;
-  dbg_dgm.elements[3].type = AT_WireUpFromLeft;
-  dbg_dgm.elements[3].row = 2;
-  dbg_dgm.elements[3].col = 1;
-  dbg_dgm.elements[3].name[0] = '\0';
-
-  dbg_dgm.elements[4].asset = CONTACT_NC;
-  dbg_dgm.elements[4].type = AT_ContactNc;
-  dbg_dgm.elements[4].row = 1;
-  dbg_dgm.elements[4].col = 2;
-  dbg_dgm.elements[4].name[0] = 'I';
-  dbg_dgm.elements[4].name[1] = ':';
-  dbg_dgm.elements[4].name[2] = '0';
-  dbg_dgm.elements[4].name[3] = '3';
-  dbg_dgm.elements[4].name[4] = '\0';
-
-  DEBUG_WIRE_ASSET(5, 1, 3, dbg_dgm);
-  DEBUG_WIRE_ASSET(6, 1, 4, dbg_dgm);
-  DEBUG_WIRE_ASSET(7, 1, 5, dbg_dgm);
-
-  dbg_dgm.elements[8].asset = LOAD_COIL;
-  dbg_dgm.elements[8].type = AT_LoadCoil;
-  dbg_dgm.elements[8].row = 1;
-  dbg_dgm.elements[8].col = 6;
-  dbg_dgm.elements[8].name[0] = 'O';
-  dbg_dgm.elements[8].name[1] = ':';
-  dbg_dgm.elements[8].name[2] = '0';
-  dbg_dgm.elements[8].name[3] = '0';
-  dbg_dgm.elements[8].name[4] = '\0';
-
-  disp_draw_diagram(disp, &dbg_dgm, dbg_dgm.elementCount - 1, 0);
-}
-// editor->selectedToolbarItem == ECT_Back ? DF_HIGHLIGHT : DF_NONE
 #define TOOLBAR_HIGHLIGHT(__ASSET, __ECT, __ITEM_CTR) \
   disp_draw_asset_on_grid(disp, __ASSET, __ITEM_CTR++, 0, editor->selectedToolbarItem == __ECT ? DF_HIGHLIGHT : DF_NONE);
 
@@ -476,13 +444,52 @@ void editor_draw_toolbar(EditorPtr editor, DispPtr disp)
 
 void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
 {
+
+  GfxDiagram dbg_dgm = {};
+  dbg_dgm.elementCount = 3;
+
+  dbg_dgm.elements[0].type = AT_ContactNo;
+  dbg_dgm.elements[0].row = 0;
+  dbg_dgm.elements[0].col = 0;
+  dbg_dgm.elements[0].data[0] = 'I';
+  dbg_dgm.elements[0].data[1] = ':';
+  dbg_dgm.elements[0].data[2] = '0';
+  dbg_dgm.elements[0].data[3] = '0';
+
+  dbg_dgm.elements[1].type = AT_LoadMove;
+  dbg_dgm.elements[1].row = 0;
+  dbg_dgm.elements[1].col = 1;
+  dbg_dgm.elements[1].data[0] = 'N';
+  dbg_dgm.elements[1].data[1] = ':';
+  dbg_dgm.elements[1].data[2] = '0';
+  dbg_dgm.elements[1].data[3] = '0';
+  dbg_dgm.elements[1].data[4] = 'C';
+  dbg_dgm.elements[1].data[5] = ':';
+  dbg_dgm.elements[1].data[6] = '0';
+  dbg_dgm.elements[1].data[7] = '0';
+
+  dbg_dgm.elements[2].type = AT_ContactNo;
+  dbg_dgm.elements[2].row = 0;
+  dbg_dgm.elements[2].col = 3;
+  dbg_dgm.elements[2].data[0] = 'I';
+  dbg_dgm.elements[2].data[1] = ':';
+  dbg_dgm.elements[2].data[2] = '0';
+  dbg_dgm.elements[2].data[3] = '2';
+
   while (true)
   {
 
     disp->clearDisplay();
     disp->setCursor(0, 0);
+    // GOOD!
+
     editor_draw_toolbar(editor, disp);
-    editor_poc(editor, disp);
+    disp_draw_diagram(disp, &dbg_dgm, dbg_dgm.elementCount, 0);
+
+    // Test drawing a function block item
+    // TEST FB
+    // disp_draw_function_block(disp, 50, 10, testCmp, DFB__OPP | DFB__SRA | DFB__SRB);
+    // disp_draw_function_block(disp, 10, 25, testMov, DFB__SRC | DFB__DST);
     disp->display();
     delay(1000);
 
