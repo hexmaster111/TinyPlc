@@ -79,7 +79,8 @@ typedef enum
 
   AT_LoadMove = 200, // data[0..3] = Dest Name    data[4..8] = source A name
 
-  AT_ContactCompare = 300, // Data[0..3] = source A name    data[4..8] = source B name  data[10] Opperator
+  //                                N:00   C:00 =
+  AT_ContactCompare = 300, // Data[0..3] = source A name    data[4..7] = source B name  data[8] Opperator
 
   AT_WireUpFromLeft = 900,
   AT_WireUpFromRight,
@@ -319,17 +320,24 @@ void disp_draw_function_block(DispPtr disp, int x, int y, char *lables, const ch
 
   if (dfb_flags & DFB__OPP)
   {
-    PRINT_LABEL_ELEMENT("OPP", 0);
+    disp->setCursor(x, y + (FONT_HEIGHT * i) + 1 + (FONT_HEIGHT * 2));
+    disp->print(" ");
+    disp->print("OPP");
+    disp->print(": ");
+    disp->print(lables[8]);
+    // LOG("Data: %s\n", lables);
+    i++;
+    ;
   }
 
   if (dfb_flags & DFB__SRA)
   {
-    PRINT_LABEL_ELEMENT("SRA", 4);
+    PRINT_LABEL_ELEMENT("SRA", 0);
   }
 
   if (dfb_flags & DFB__SRB)
   {
-    PRINT_LABEL_ELEMENT("SRB", 7);
+    PRINT_LABEL_ELEMENT("SRB", 4);
   }
 
   disp->drawRect(x, y,
@@ -349,11 +357,11 @@ void __disp_draw_wire(DispPtr disp, GfxAssetPtr asset, int newRow, u_int8_t flag
   disp_draw_asset_on_grid(disp, asset->asset, asset->col, newRow + 1, flags);
 }
 
-void __disp_draw_fb(DispPtr disp, GfxAssetPtr asset, int newRow, const char *title)
+void __disp_draw_fb(DispPtr disp, GfxAssetPtr asset, int newRow, const char *title, u_int8_t flags)
 {
   int x = (asset->col * LD_ASSET_WIDTH) + 2;
   int y = (newRow + 1) * LD_ASSET_HEIGHT;
-  disp_draw_function_block(disp, x, y, asset->data, (char *)title, DFB__SRC | DFB__DST);
+  disp_draw_function_block(disp, x, y, asset->data, (char *)title, flags);
 }
 
 #define CASE_DO_BREAK(__CASE, __FUNC) \
@@ -382,11 +390,12 @@ void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row_to_d
       CASE_DO_BREAK(AT_LoadLatch, __disp_draw_simple_asset(disp, &element, LOAD_LATCH, newRow))
       CASE_DO_BREAK(AT_LoadReset, __disp_draw_simple_asset(disp, &element, LOAD_RESET, newRow))
 
-      CASE_DO_BREAK(AT_LoadAdd, __disp_draw_fb(disp, &element, newRow, "ADD"))
-      CASE_DO_BREAK(AT_LoadSub, __disp_draw_fb(disp, &element, newRow, "SUB"))
-      CASE_DO_BREAK(AT_LoadMut, __disp_draw_fb(disp, &element, newRow, "MUT"))
-      CASE_DO_BREAK(AT_LoadDiv, __disp_draw_fb(disp, &element, newRow, "DIV"))
-      CASE_DO_BREAK(AT_LoadMove, __disp_draw_fb(disp, &element, newRow, "MOV"))
+      CASE_DO_BREAK(AT_LoadAdd, __disp_draw_fb(disp, &element, newRow, "ADD", DFB__DST | DFB__SRA | DFB__SRB))
+      CASE_DO_BREAK(AT_LoadSub, __disp_draw_fb(disp, &element, newRow, "SUB", DFB__DST | DFB__SRA | DFB__SRB))
+      CASE_DO_BREAK(AT_LoadMut, __disp_draw_fb(disp, &element, newRow, "MUT", DFB__DST | DFB__SRA | DFB__SRB))
+      CASE_DO_BREAK(AT_LoadDiv, __disp_draw_fb(disp, &element, newRow, "DIV", DFB__DST | DFB__SRA | DFB__SRB))
+      CASE_DO_BREAK(AT_LoadMove, __disp_draw_fb(disp, &element, newRow, "MOV", DFB__SRC | DFB__DST))
+      CASE_DO_BREAK(AT_ContactCompare, __disp_draw_fb(disp, &element, newRow, "CMP", DFB__OPP | DFB__SRA | DFB__SRB))
 
     case AT_WireUpFromLeft:
     case AT_WireUpFromRight:
@@ -446,7 +455,7 @@ void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
 {
 
   GfxDiagram dbg_dgm = {};
-  dbg_dgm.elementCount = 3;
+  dbg_dgm.elementCount = 4;
 
   dbg_dgm.elements[0].type = AT_ContactNo;
   dbg_dgm.elements[0].row = 0;
@@ -456,17 +465,20 @@ void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
   dbg_dgm.elements[0].data[2] = '0';
   dbg_dgm.elements[0].data[3] = '0';
 
-  dbg_dgm.elements[1].type = AT_LoadMove;
+  dbg_dgm.elements[1].type = AT_ContactCompare;
   dbg_dgm.elements[1].row = 0;
   dbg_dgm.elements[1].col = 1;
   dbg_dgm.elements[1].data[0] = 'N';
   dbg_dgm.elements[1].data[1] = ':';
   dbg_dgm.elements[1].data[2] = '0';
   dbg_dgm.elements[1].data[3] = '0';
+
   dbg_dgm.elements[1].data[4] = 'C';
   dbg_dgm.elements[1].data[5] = ':';
   dbg_dgm.elements[1].data[6] = '0';
   dbg_dgm.elements[1].data[7] = '0';
+
+  dbg_dgm.elements[1].data[8] = '=';
 
   dbg_dgm.elements[2].type = AT_ContactNo;
   dbg_dgm.elements[2].row = 0;
@@ -475,6 +487,18 @@ void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
   dbg_dgm.elements[2].data[1] = ':';
   dbg_dgm.elements[2].data[2] = '0';
   dbg_dgm.elements[2].data[3] = '2';
+
+  dbg_dgm.elements[3].type = AT_LoadMove;
+  dbg_dgm.elements[3].row = 0;
+  dbg_dgm.elements[3].col = 4;
+  dbg_dgm.elements[3].data[0] = 'N';
+  dbg_dgm.elements[3].data[1] = ':';
+  dbg_dgm.elements[3].data[2] = '0';
+  dbg_dgm.elements[3].data[3] = '0';
+  dbg_dgm.elements[3].data[4] = 'C';
+  dbg_dgm.elements[3].data[5] = ':';
+  dbg_dgm.elements[3].data[6] = '0';
+  dbg_dgm.elements[3].data[7] = '0';
 
   while (true)
   {
