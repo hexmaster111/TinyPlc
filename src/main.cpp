@@ -90,19 +90,17 @@ typedef enum
 /// @brief A single item on the diagram
 typedef struct
 {
-  // ptr to image data
-  AssetPtr asset;
+  AssetPtr asset; // ptr to image data
 
-  // type of asset
-  AssetType type;
+  AssetType type; // type of asset
 
-  // Data for this asset
-  char data[ASSET_MAX_DATA_LENGTH];
+  char assetLabels[ASSET_MAX_DATA_LENGTH]; // Data for this asset
 
   // TODO: data for the asset, like the value of a coil, or the name of a variable, etc
 
   uint8_t row; // Row, or x
   uint8_t col; // Column, or y
+
 } GfxAsset;
 typedef GfxAsset *GfxAssetPtr;
 
@@ -184,6 +182,9 @@ typedef struct
   // what item withn the toolbar is selected
   Editor_CurrentlySelectedToolbarItem selectedToolbarItem;
   GfxDocument document;
+  int currentDiagramIndex;
+  int currentDiagramElementIndex;
+
 } Editor;
 
 typedef Editor *EditorPtr;
@@ -302,8 +303,30 @@ void disp_highlight_asset_on_grid(DispPtr disp, AssetPtr asset, int x, int y)
 /// @param lables Array of strings to print See DFB__* for the index of each string
 /// @param title Title of the block
 /// @param dfb_flags Flags to control what is printed
-void disp_draw_function_block(DispPtr disp, int x, int y, char *lables, const char *title, u_int8_t dfb_flags = DFB_NONE)
+void disp_draw_function_block(DispPtr disp, int x, int y, char *lables, const char *title, u_int8_t dfb_flags, u_int8_t draw_flags)
 {
+
+  int totalElements = 0;
+  // total elements = the number of dfb flags set, so we can calculate the height of the block
+  totalElements += (dfb_flags & DFB__SRC) ? 1 : 0;
+  totalElements += (dfb_flags & DFB__DST) ? 1 : 0;
+  totalElements += (dfb_flags & DFB__OPP) ? 1 : 0;
+  totalElements += (dfb_flags & DFB__SRA) ? 1 : 0;
+  totalElements += (dfb_flags & DFB__SRB) ? 1 : 0;
+
+  if (draw_flags & DF_HIGHLIGHT)
+  {
+    disp->fillRect(x, y,
+                   LD_ASSET_WIDTH * 2,
+                   LD_ASSET_HEIGHT * (totalElements + 3) - 1,
+                   1);
+    disp->setTextColor(0); // 0 when highlighted, 1 when not
+  }
+  else
+  {
+    disp->setTextColor(1);
+  }
+
   disp->setCursor(x, y + FONT_HEIGHT);
   disp->print("     ");
   disp->println(title);
@@ -342,26 +365,40 @@ void disp_draw_function_block(DispPtr disp, int x, int y, char *lables, const ch
 
   disp->drawRect(x, y,
                  LD_ASSET_WIDTH * 2,
-                 LD_ASSET_HEIGHT * (i + 3) - 1,
+                 LD_ASSET_HEIGHT * (totalElements + 3) - 1,
                  1);
-}
 
-void __disp_draw_simple_asset(DispPtr disp, GfxAssetPtr asset, AssetPtr sprite, int newRow)
+  disp->setTextColor(1);
+}
+// TODO: highlight
+void __disp_draw_simple_asset(DispPtr disp, GfxAssetPtr asset, AssetPtr sprite, int newRow, bool highlight)
 {
-  disp_draw_text_on_grid(disp, asset->data, asset->col, newRow, 5);
+  disp_draw_text_on_grid(disp, asset->assetLabels, asset->col, newRow, 5);
 
-  disp_draw_asset_on_grid(disp, sprite, asset->col, newRow + 1, DF_NONE);
+  u_int8_t flags = DF_NONE;
+  if (highlight)
+  {
+    flags |= DF_HIGHLIGHT;
+  }
+
+  disp_draw_asset_on_grid(disp, sprite, asset->col, newRow + 1, flags);
 }
+
 void __disp_draw_wire(DispPtr disp, GfxAssetPtr asset, int newRow, u_int8_t flags)
 {
   disp_draw_asset_on_grid(disp, asset->asset, asset->col, newRow + 1, flags);
 }
 
-void __disp_draw_fb(DispPtr disp, GfxAssetPtr asset, int newRow, const char *title, u_int8_t flags)
+void __disp_draw_fb(DispPtr disp, GfxAssetPtr asset, int newRow, const char *title, u_int8_t labelFlags, bool highlight)
 {
   int x = (asset->col * LD_ASSET_WIDTH) + 2;
   int y = (newRow + 1) * LD_ASSET_HEIGHT;
-  disp_draw_function_block(disp, x, y, asset->data, (char *)title, flags);
+  u_int8_t drawFlags = DF_NONE;
+  if (highlight)
+  {
+    drawFlags |= DF_HIGHLIGHT;
+  }
+  disp_draw_function_block(disp, x, y, asset->assetLabels, (char *)title, labelFlags, drawFlags);
 }
 
 #define CASE_DO_BREAK(__CASE, __FUNC) \
@@ -370,32 +407,31 @@ void __disp_draw_fb(DispPtr disp, GfxAssetPtr asset, int newRow, const char *tit
     break;
 
 // NOTE: the length is the number of elements - 1 (its zero based)
-void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row_to_draw_on)
+void __disp_draw_diagram_line(DispPtr disp, GfxDiagramPtr dia, int row_to_draw_on, int element_to_highlight)
 {
   // LOG("_________________NAME, COL, COR ROW\n");
   // LOG("disp_draw_diagram: len: %i\n", length);
-  for (int i = 0; i < length; i++)
+  for (int i = 0; i < dia->elementCount; i++) // TODO: Check this, it may be off by one
   {
     GfxAsset element = dia->elements[i];
     int newRow = ((row_to_draw_on + (element.row + 1)) * 2) - 1; // Inital offset, -1 for the menu bar that only takes one row
 
     u_int8_t flags = DF_NONE;
-
+    bool highlight = i == element_to_highlight;
     switch (element.type)
     {
+      CASE_DO_BREAK(AT_ContactNc, __disp_draw_simple_asset(disp, &element, CONTACT_NC, newRow, highlight))
+      CASE_DO_BREAK(AT_ContactNo, __disp_draw_simple_asset(disp, &element, CONTACT_NO, newRow, highlight))
+      CASE_DO_BREAK(AT_LoadCoil, __disp_draw_simple_asset(disp, &element, LOAD_COIL, newRow, highlight))
+      CASE_DO_BREAK(AT_LoadLatch, __disp_draw_simple_asset(disp, &element, LOAD_LATCH, newRow, highlight))
+      CASE_DO_BREAK(AT_LoadReset, __disp_draw_simple_asset(disp, &element, LOAD_RESET, newRow, highlight))
 
-      CASE_DO_BREAK(AT_ContactNc, __disp_draw_simple_asset(disp, &element, CONTACT_NC, newRow))
-      CASE_DO_BREAK(AT_ContactNo, __disp_draw_simple_asset(disp, &element, CONTACT_NO, newRow))
-      CASE_DO_BREAK(AT_LoadCoil, __disp_draw_simple_asset(disp, &element, LOAD_COIL, newRow))
-      CASE_DO_BREAK(AT_LoadLatch, __disp_draw_simple_asset(disp, &element, LOAD_LATCH, newRow))
-      CASE_DO_BREAK(AT_LoadReset, __disp_draw_simple_asset(disp, &element, LOAD_RESET, newRow))
-
-      CASE_DO_BREAK(AT_LoadAdd, __disp_draw_fb(disp, &element, newRow, "ADD", DFB__DST | DFB__SRA | DFB__SRB))
-      CASE_DO_BREAK(AT_LoadSub, __disp_draw_fb(disp, &element, newRow, "SUB", DFB__DST | DFB__SRA | DFB__SRB))
-      CASE_DO_BREAK(AT_LoadMut, __disp_draw_fb(disp, &element, newRow, "MUT", DFB__DST | DFB__SRA | DFB__SRB))
-      CASE_DO_BREAK(AT_LoadDiv, __disp_draw_fb(disp, &element, newRow, "DIV", DFB__DST | DFB__SRA | DFB__SRB))
-      CASE_DO_BREAK(AT_LoadMove, __disp_draw_fb(disp, &element, newRow, "MOV", DFB__SRC | DFB__DST))
-      CASE_DO_BREAK(AT_ContactCompare, __disp_draw_fb(disp, &element, newRow, "CMP", DFB__OPP | DFB__SRA | DFB__SRB))
+      CASE_DO_BREAK(AT_LoadAdd, __disp_draw_fb(disp, &element, newRow, "ADD", DFB__DST | DFB__SRA | DFB__SRB, highlight))
+      CASE_DO_BREAK(AT_LoadSub, __disp_draw_fb(disp, &element, newRow, "SUB", DFB__DST | DFB__SRA | DFB__SRB, highlight))
+      CASE_DO_BREAK(AT_LoadMut, __disp_draw_fb(disp, &element, newRow, "MUT", DFB__DST | DFB__SRA | DFB__SRB, highlight))
+      CASE_DO_BREAK(AT_LoadDiv, __disp_draw_fb(disp, &element, newRow, "DIV", DFB__DST | DFB__SRA | DFB__SRB, highlight))
+      CASE_DO_BREAK(AT_LoadMove, __disp_draw_fb(disp, &element, newRow, "MOV", DFB__SRC | DFB__DST, highlight))
+      CASE_DO_BREAK(AT_ContactCompare, __disp_draw_fb(disp, &element, newRow, "CMP", DFB__OPP | DFB__SRA | DFB__SRB, highlight))
 
     case AT_WireUpFromLeft:
     case AT_WireUpFromRight:
@@ -418,7 +454,7 @@ void disp_draw_diagram(DispPtr disp, GfxDiagramPtr dia, int length, int row_to_d
 #define TOOLBAR_HIGHLIGHT(__ASSET, __ECT, __ITEM_CTR) \
   disp_draw_asset_on_grid(disp, __ASSET, __ITEM_CTR++, 0, editor->selectedToolbarItem == __ECT ? DF_HIGHLIGHT : DF_NONE);
 
-void editor_draw_toolbar(EditorPtr editor, DispPtr disp)
+void __disp_draw_toolbar(EditorPtr editor, DispPtr disp)
 {
   // ui nav controls
   int item = 1;
@@ -451,73 +487,91 @@ void editor_draw_toolbar(EditorPtr editor, DispPtr disp)
   }
 }
 
+void disp_draw_editor_state(EditorPtr editor, DispPtr disp)
+{
+  __disp_draw_toolbar(editor, disp);
+
+  // TODO: for each diagram do this
+  int currentDiagramIndex = editor->currentDiagramIndex;
+  int currentDiagramElementIndex = editor->currentDiagramElementIndex;
+
+  __disp_draw_diagram_line(disp, &editor->document.diagrams[currentDiagramIndex], 0, currentDiagramElementIndex); // TODO: Inc this 0 to draw many diagrams in one go
+}
+
 void do_poc_loop_no_return(EditorPtr editor, DispPtr disp)
 {
 
   GfxDiagram dbg_dgm = {};
-  dbg_dgm.elementCount = 4;
+  int i = 0;
 
-  dbg_dgm.elements[0].type = AT_ContactNo;
-  dbg_dgm.elements[0].row = 0;
-  dbg_dgm.elements[0].col = 0;
-  dbg_dgm.elements[0].data[0] = 'I';
-  dbg_dgm.elements[0].data[1] = ':';
-  dbg_dgm.elements[0].data[2] = '0';
-  dbg_dgm.elements[0].data[3] = '0';
+  dbg_dgm.elements[i].type = AT_ContactNo;
+  dbg_dgm.elements[i].row = 0;
+  dbg_dgm.elements[i].col = 0;
+  dbg_dgm.elements[i].assetLabels[0] = 'I';
+  dbg_dgm.elements[i].assetLabels[1] = ':';
+  dbg_dgm.elements[i].assetLabels[2] = '0';
+  dbg_dgm.elements[i].assetLabels[3] = '0';
+  i++;
+  dbg_dgm.elements[i].type = AT_ContactCompare;
+  dbg_dgm.elements[i].row = 0;
+  dbg_dgm.elements[i].col = 1;
+  dbg_dgm.elements[i].assetLabels[0] = 'N';
+  dbg_dgm.elements[i].assetLabels[1] = ':';
+  dbg_dgm.elements[i].assetLabels[2] = '0';
+  dbg_dgm.elements[i].assetLabels[3] = '0';
+  dbg_dgm.elements[i].assetLabels[4] = 'C';
+  dbg_dgm.elements[i].assetLabels[5] = ':';
+  dbg_dgm.elements[i].assetLabels[6] = '0';
+  dbg_dgm.elements[i].assetLabels[7] = '0';
+  dbg_dgm.elements[i].assetLabels[8] = '=';
+  i++;
+  dbg_dgm.elements[i].type = AT_ContactNo;
+  dbg_dgm.elements[i].row = 0;
+  dbg_dgm.elements[i].col = 3;
+  dbg_dgm.elements[i].assetLabels[0] = 'I';
+  dbg_dgm.elements[i].assetLabels[1] = ':';
+  dbg_dgm.elements[i].assetLabels[2] = '0';
+  dbg_dgm.elements[i].assetLabels[3] = '2';
+  i++;
+  dbg_dgm.elements[i].type = AT_LoadMove;
+  dbg_dgm.elements[i].row = 0;
+  dbg_dgm.elements[i].col = 4;
+  dbg_dgm.elements[i].assetLabels[0] = 'N';
+  dbg_dgm.elements[i].assetLabels[1] = ':';
+  dbg_dgm.elements[i].assetLabels[2] = '0';
+  dbg_dgm.elements[i].assetLabels[3] = '0';
+  dbg_dgm.elements[i].assetLabels[4] = 'C';
+  dbg_dgm.elements[i].assetLabels[5] = ':';
+  dbg_dgm.elements[i].assetLabels[6] = '0';
+  dbg_dgm.elements[i].assetLabels[7] = '0';
+  i++;
+  dbg_dgm.elements[i].type = AT_LoadCoil;
+  dbg_dgm.elements[i].row = 0;
+  dbg_dgm.elements[i].col = 6;
+  dbg_dgm.elements[i].assetLabels[0] = 'O';
+  dbg_dgm.elements[i].assetLabels[1] = ':';
+  dbg_dgm.elements[i].assetLabels[2] = '0';
+  dbg_dgm.elements[i].assetLabels[3] = '0';
+  dbg_dgm.elementCount = i + 1;
 
-  dbg_dgm.elements[1].type = AT_ContactCompare;
-  dbg_dgm.elements[1].row = 0;
-  dbg_dgm.elements[1].col = 1;
-  dbg_dgm.elements[1].data[0] = 'N';
-  dbg_dgm.elements[1].data[1] = ':';
-  dbg_dgm.elements[1].data[2] = '0';
-  dbg_dgm.elements[1].data[3] = '0';
+  editor->document.diagrams[0] = dbg_dgm;
+  editor->document.diagramCount = 1;
 
-  dbg_dgm.elements[1].data[4] = 'C';
-  dbg_dgm.elements[1].data[5] = ':';
-  dbg_dgm.elements[1].data[6] = '0';
-  dbg_dgm.elements[1].data[7] = '0';
-
-  dbg_dgm.elements[1].data[8] = '=';
-
-  dbg_dgm.elements[2].type = AT_ContactNo;
-  dbg_dgm.elements[2].row = 0;
-  dbg_dgm.elements[2].col = 3;
-  dbg_dgm.elements[2].data[0] = 'I';
-  dbg_dgm.elements[2].data[1] = ':';
-  dbg_dgm.elements[2].data[2] = '0';
-  dbg_dgm.elements[2].data[3] = '2';
-
-  dbg_dgm.elements[3].type = AT_LoadMove;
-  dbg_dgm.elements[3].row = 0;
-  dbg_dgm.elements[3].col = 4;
-  dbg_dgm.elements[3].data[0] = 'N';
-  dbg_dgm.elements[3].data[1] = ':';
-  dbg_dgm.elements[3].data[2] = '0';
-  dbg_dgm.elements[3].data[3] = '0';
-  dbg_dgm.elements[3].data[4] = 'C';
-  dbg_dgm.elements[3].data[5] = ':';
-  dbg_dgm.elements[3].data[6] = '0';
-  dbg_dgm.elements[3].data[7] = '0';
+  editor->currentDiagramIndex = 0;
+  editor->currentDiagramElementIndex = -1;
 
   while (true)
   {
 
     disp->clearDisplay();
     disp->setCursor(0, 0);
-    // GOOD!
-
-    editor_draw_toolbar(editor, disp);
-    disp_draw_diagram(disp, &dbg_dgm, dbg_dgm.elementCount, 0);
-
-    // Test drawing a function block item
-    // TEST FB
-    // disp_draw_function_block(disp, 50, 10, testCmp, DFB__OPP | DFB__SRA | DFB__SRB);
-    // disp_draw_function_block(disp, 10, 25, testMov, DFB__SRC | DFB__DST);
+    disp_draw_editor_state(editor, disp);
     disp->display();
     delay(1000);
 
     editor->selectedToolbarItem = (Editor_CurrentlySelectedToolbarItem)((editor->selectedToolbarItem + 1) % ETC_CURRENTLY_SELECTED_TOOLBAR_ITEM_COUNT);
+    editor->currentDiagramElementIndex = (editor->currentDiagramElementIndex + 1) % editor->document.diagrams[editor->currentDiagramIndex].elementCount;
+    LOG("editor->currentDiagramElementIndex: %i\n", editor->currentDiagramElementIndex);
   }
 }
 
